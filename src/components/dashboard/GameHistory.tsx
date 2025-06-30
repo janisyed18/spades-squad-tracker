@@ -52,9 +52,9 @@ export const GameHistory = ({
                     e.stopPropagation(); // Prevent card click
                     onDeleteGame(game.id);
                   }}
-                  variant="outline"
+                  variant="ghost" // Changed variant to ghost for transparency
                   size="sm"
-                  className="border-red-600 text-red-400 hover:bg-red-900/20 hover:border-red-500"
+                  className="text-red-400 hover:bg-red-900/10 hover:text-red-300" // Adjusted for transparency
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
