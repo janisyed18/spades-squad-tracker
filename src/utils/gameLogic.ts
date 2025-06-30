@@ -6,14 +6,12 @@
  * @returns The score for this round (excluding bags)
  */
 export const calculateScore = (bid: number, won: number): number => {
-  if (bid === 0 || won === 0) return 0;
-  
-  if (bid === won) {
-    // Made exact bid: 10 points per bid
-    return bid * 10;
-  } else if (bid > won) {
+  if (won < bid) {
     // Failed to make bid: lose 10 points per bid
     return -bid * 10;
+  } else if (bid === won) {
+    // Made exact bid: 10 points per bid
+    return bid * 10;
   } else {
     // Made more than bid: 10 points per bid (bags are counted separately)
     return bid * 10;

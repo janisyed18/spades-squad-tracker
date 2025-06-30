@@ -62,6 +62,11 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     await updateRound(gameId, roundNumber, team, bid, won, bags, score);
   };
 
+  const handleHomeClick = () => {
+    setCurrentView('dashboard');
+    setCurrentGame(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -76,8 +81,14 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
       <header className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Spade className="h-6 w-6 text-blue-400" />
-            <h1 className="text-xl font-bold text-white">Spades Scorecard</h1>
+            <Button
+              onClick={handleHomeClick}
+              variant="ghost"
+              className="flex items-center space-x-2 text-white hover:bg-slate-700"
+            >
+              <Spade className="h-6 w-6 text-blue-400" />
+              <h1 className="text-xl font-bold">Spades Scorecard</h1>
+            </Button>
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-slate-300">Welcome, {user}</span>

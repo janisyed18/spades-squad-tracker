@@ -1,6 +1,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Target } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Palette, ShoppingBag } from 'lucide-react';
 import { Team } from '@/types/game';
 
 interface ScoreDisplayProps {
@@ -11,9 +12,21 @@ interface ScoreDisplayProps {
   winner?: string;
   createdAt?: Date;
   finishedAt?: Date;
+  selectedThemes?: { teamA?: any; teamB?: any };
+  onThemeSelect?: (team: 'teamA' | 'teamB') => void;
 }
 
-export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, finishedAt }: ScoreDisplayProps) => {
+export const ScoreDisplay = ({ 
+  teamA, 
+  teamB, 
+  scores, 
+  bags, 
+  winner, 
+  createdAt, 
+  finishedAt,
+  selectedThemes,
+  onThemeSelect
+}: ScoreDisplayProps) => {
   const isTeamAWinning = scores.teamA > scores.teamB;
   const isGameFinished = winner !== undefined;
 
@@ -31,21 +44,19 @@ export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, fi
   return (
     <div className="space-y-4">
       {/* Game Times */}
-      {(createdAt || finishedAt) && (
-        <div className="text-center text-slate-400 text-sm space-y-1">
-          {createdAt && (
-            <div>Started: {formatDateTime(createdAt)}</div>
-          )}
-          {finishedAt && (
-            <div>Finished: {formatDateTime(finishedAt)}</div>
-          )}
-        </div>
-      )}
+      <div className="flex justify-between text-slate-400 text-sm">
+        {createdAt && (
+          <div className="text-left">Started: {formatDateTime(createdAt)}</div>
+        )}
+        {finishedAt && (
+          <div className="text-right">Finished: {formatDateTime(finishedAt)}</div>
+        )}
+      </div>
 
       {/* Team Scores */}
       <div className="grid md:grid-cols-2 gap-4">
         {/* Team A Score */}
-        <Card className={`border-2 transition-colors ${
+        <Card className={`border-2 transition-colors ${selectedThemes?.teamA?.background || ''} ${
           isGameFinished && winner === teamA.name
             ? 'border-green-500 bg-green-900/20' 
             : !isGameFinished && isTeamAWinning
@@ -54,25 +65,39 @@ export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, fi
         }`}>
           <CardContent className="p-6 text-center">
             <div className="flex items-center justify-center mb-2">
-              <h3 className="text-xl font-bold text-blue-400">{teamA.name}</h3>
+              <h3 className={`text-xl font-bold ${selectedThemes?.teamA?.text || 'text-blue-400'}`}>
+                {teamA.name}
+              </h3>
               {isGameFinished && winner === teamA.name && (
                 <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
+              )}
+              {onThemeSelect && (
+                <Button
+                  onClick={() => onThemeSelect('teamA')}
+                  variant="ghost"
+                  size="sm"
+                  className="ml-2"
+                >
+                  <Palette className="h-4 w-4" />
+                </Button>
               )}
             </div>
             
             {teamA.players.length > 0 && (
-              <p className="text-sm text-slate-400 mb-3">
-                {teamA.players.filter(p => p).join(', ')}
-              </p>
+              <div className={`text-sm ${selectedThemes?.teamA?.text || 'text-slate-400'} mb-3`}>
+                {teamA.players.filter(p => p).map((player, i) => (
+                  <div key={i}>{player}</div>
+                ))}
+              </div>
             )}
             
-            <div className="text-4xl font-bold text-white mb-2">
+            <div className={`text-4xl font-bold ${selectedThemes?.teamA?.accent || 'text-white'} mb-2`}>
               {scores.teamA}
             </div>
             
             <div className="flex items-center justify-center space-x-4 text-sm">
-              <div className="flex items-center text-yellow-400">
-                <Target className="h-4 w-4 mr-1" />
+              <div className={`flex items-center ${selectedThemes?.teamA?.accent || 'text-yellow-400'}`}>
+                <ShoppingBag className="h-4 w-4 mr-1" />
                 {bags.teamA} bags
               </div>
             </div>
@@ -80,7 +105,7 @@ export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, fi
         </Card>
 
         {/* Team B Score */}
-        <Card className={`border-2 transition-colors ${
+        <Card className={`border-2 transition-colors ${selectedThemes?.teamB?.background || ''} ${
           isGameFinished && winner === teamB.name
             ? 'border-green-500 bg-green-900/20' 
             : !isGameFinished && !isTeamAWinning
@@ -89,25 +114,39 @@ export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, fi
         }`}>
           <CardContent className="p-6 text-center">
             <div className="flex items-center justify-center mb-2">
-              <h3 className="text-xl font-bold text-green-400">{teamB.name}</h3>
+              <h3 className={`text-xl font-bold ${selectedThemes?.teamB?.text || 'text-green-400'}`}>
+                {teamB.name}
+              </h3>
               {isGameFinished && winner === teamB.name && (
                 <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
+              )}
+              {onThemeSelect && (
+                <Button
+                  onClick={() => onThemeSelect('teamB')}
+                  variant="ghost"
+                  size="sm"
+                  className="ml-2"
+                >
+                  <Palette className="h-4 w-4" />
+                </Button>
               )}
             </div>
             
             {teamB.players.length > 0 && (
-              <p className="text-sm text-slate-400 mb-3">
-                {teamB.players.filter(p => p).join(', ')}
-              </p>
+              <div className={`text-sm ${selectedThemes?.teamB?.text || 'text-slate-400'} mb-3`}>
+                {teamB.players.filter(p => p).map((player, i) => (
+                  <div key={i}>{player}</div>
+                ))}
+              </div>
             )}
             
-            <div className="text-4xl font-bold text-white mb-2">
+            <div className={`text-4xl font-bold ${selectedThemes?.teamB?.accent || 'text-white'} mb-2`}>
               {scores.teamB}
             </div>
             
             <div className="flex items-center justify-center space-x-4 text-sm">
-              <div className="flex items-center text-yellow-400">
-                <Target className="h-4 w-4 mr-1" />
+              <div className={`flex items-center ${selectedThemes?.teamB?.accent || 'text-yellow-400'}`}>
+                <ShoppingBag className="h-4 w-4 mr-1" />
                 {bags.teamB} bags
               </div>
             </div>

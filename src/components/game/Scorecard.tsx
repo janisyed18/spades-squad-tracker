@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trophy, Palette, AlertTriangle, X } from 'lucide-react';
+import { ArrowLeft, Trophy, AlertTriangle } from 'lucide-react';
 import { Game, Round } from '@/types/game';
 import { RoundInput } from './RoundInput';
 import { ScoreDisplay } from './ScoreDisplay';
@@ -24,45 +25,6 @@ type Theme = {
   accent: string;
 };
 
-const themes: { [key: string]: Theme[] } = {
-  beautiful: [
-    { id: 'sunset', name: 'Sunset', background: 'bg-gradient-to-br from-orange-300 to-pink-300', text: 'text-gray-800', accent: 'text-orange-600' },
-    { id: 'ocean', name: 'Ocean', background: 'bg-gradient-to-br from-blue-300 to-cyan-300', text: 'text-gray-800', accent: 'text-blue-600' },
-    { id: 'forest', name: 'Forest', background: 'bg-gradient-to-br from-green-300 to-emerald-300', text: 'text-gray-800', accent: 'text-green-600' },
-    { id: 'lavender', name: 'Lavender', background: 'bg-gradient-to-br from-purple-200 to-indigo-200', text: 'text-gray-800', accent: 'text-purple-600' },
-    { id: 'spring', name: 'Spring', background: 'bg-gradient-to-br from-lime-200 to-green-200', text: 'text-gray-800', accent: 'text-lime-600' },
-    { id: 'rose', name: 'Rose', background: 'bg-gradient-to-br from-rose-200 to-pink-200', text: 'text-gray-800', accent: 'text-rose-600' },
-    { id: 'sky', name: 'Sky', background: 'bg-gradient-to-br from-sky-200 to-blue-200', text: 'text-gray-800', accent: 'text-sky-600' },
-    { id: 'pearl', name: 'Pearl', background: 'bg-gradient-to-br from-slate-100 to-gray-200', text: 'text-gray-800', accent: 'text-slate-600' },
-    { id: 'coral', name: 'Coral', background: 'bg-gradient-to-br from-coral-200 to-orange-200', text: 'text-gray-800', accent: 'text-coral-600' },
-    { id: 'mint', name: 'Fresh Mint', background: 'bg-gradient-to-br from-mint-200 to-teal-200', text: 'text-gray-800', accent: 'text-teal-600' }
-  ],
-  fierce: [
-    { id: 'fire', name: 'Fire', background: 'bg-gradient-to-br from-red-600 to-orange-600', text: 'text-white', accent: 'text-yellow-300' },
-    { id: 'thunder', name: 'Thunder', background: 'bg-gradient-to-br from-purple-600 to-indigo-600', text: 'text-white', accent: 'text-purple-300' },
-    { id: 'steel', name: 'Steel', background: 'bg-gradient-to-br from-gray-600 to-slate-600', text: 'text-white', accent: 'text-gray-300' },
-    { id: 'storm', name: 'Storm', background: 'bg-gradient-to-br from-gray-800 to-slate-800', text: 'text-white', accent: 'text-blue-300' },
-    { id: 'magma', name: 'Magma', background: 'bg-gradient-to-br from-red-800 to-black', text: 'text-white', accent: 'text-red-300' },
-    { id: 'venom', name: 'Venom', background: 'bg-gradient-to-br from-green-800 to-black', text: 'text-white', accent: 'text-green-300' },
-    { id: 'shadow', name: 'Shadow', background: 'bg-gradient-to-br from-black to-gray-900', text: 'text-white', accent: 'text-gray-400' },
-    { id: 'crimson', name: 'Crimson', background: 'bg-gradient-to-br from-red-900 to-red-700', text: 'text-white', accent: 'text-red-200' },
-    { id: 'midnight', name: 'Midnight', background: 'bg-gradient-to-br from-indigo-900 to-black', text: 'text-white', accent: 'text-indigo-300' },
-    { id: 'ember', name: 'Ember', background: 'bg-gradient-to-br from-orange-800 to-red-800', text: 'text-white', accent: 'text-orange-200' }
-  ],
-  cute: [
-    { id: 'bubblegum', name: 'Bubblegum', background: 'bg-gradient-to-br from-pink-200 to-purple-200', text: 'text-gray-700', accent: 'text-pink-600' },
-    { id: 'cotton', name: 'Cotton Candy', background: 'bg-gradient-to-br from-pink-100 to-blue-100', text: 'text-gray-700', accent: 'text-pink-500' },
-    { id: 'peach', name: 'Peach', background: 'bg-gradient-to-br from-peach-200 to-orange-200', text: 'text-gray-700', accent: 'text-peach-600' },
-    { id: 'lemon', name: 'Lemon', background: 'bg-gradient-to-br from-yellow-200 to-lime-200', text: 'text-gray-700', accent: 'text-yellow-600' },
-    { id: 'unicorn', name: 'Unicorn', background: 'bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200', text: 'text-gray-700', accent: 'text-purple-600' },
-    { id: 'strawberry', name: 'Strawberry', background: 'bg-gradient-to-br from-red-200 to-pink-200', text: 'text-gray-700', accent: 'text-red-500' },
-    { id: 'vanilla', name: 'Vanilla', background: 'bg-gradient-to-br from-yellow-100 to-orange-100', text: 'text-gray-700', accent: 'text-yellow-600' },
-    { id: 'blueberry', name: 'Blueberry', background: 'bg-gradient-to-br from-blue-200 to-purple-200', text: 'text-gray-700', accent: 'text-blue-600' },
-    { id: 'mint-cream', name: 'Mint Cream', background: 'bg-gradient-to-br from-green-100 to-blue-100', text: 'text-gray-700', accent: 'text-green-600' },
-    { id: 'cherry', name: 'Cherry Blossom', background: 'bg-gradient-to-br from-pink-100 to-rose-100', text: 'text-gray-700', accent: 'text-pink-500' }
-  ]
-};
-
 export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRound }: ScorecardProps) => {
   const [currentGame, setCurrentGame] = useState<Game>(game);
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
@@ -71,6 +33,21 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
   const [selectedThemes, setSelectedThemes] = useState<{ teamA?: Theme; teamB?: Theme }>({});
   const [showThemeSelector, setShowThemeSelector] = useState<'teamA' | 'teamB' | null>(null);
   const [roundErrors, setRoundErrors] = useState<{ [key: string]: boolean }>({});
+
+  // Load saved themes from localStorage
+  useEffect(() => {
+    const savedThemes = localStorage.getItem(`game-themes-${currentGame.id}`);
+    if (savedThemes) {
+      setSelectedThemes(JSON.parse(savedThemes));
+    }
+  }, [currentGame.id]);
+
+  // Save themes to localStorage whenever they change
+  useEffect(() => {
+    if (Object.keys(selectedThemes).length > 0) {
+      localStorage.setItem(`game-themes-${currentGame.id}`, JSON.stringify(selectedThemes));
+    }
+  }, [selectedThemes, currentGame.id]);
 
   // Fix scoring calculation - don't add bag points to score
   useEffect(() => {
@@ -162,8 +139,7 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
 
   const availableThemes = (team: 'teamA' | 'teamB') => {
     const otherTeamTheme = team === 'teamA' ? selectedThemes.teamB : selectedThemes.teamA;
-    const allThemes = Object.values(themes).flat();
-    return allThemes.filter(theme => !otherTeamTheme || theme.id !== otherTeamTheme.id);
+    return []; // Not used in new implementation
   };
 
   const isGameComplete = currentGame.rounds.every(round => 
@@ -214,36 +190,18 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
         winner={currentGame.winner}
         createdAt={currentGame.createdAt}
         finishedAt={currentGame.finishedAt}
+        selectedThemes={selectedThemes}
+        onThemeSelect={setShowThemeSelector}
       />
 
       {/* Team Scorecards */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Team A Scorecard */}
         <Card className={`${selectedThemes.teamA?.background || 'bg-slate-800/50'} border-slate-700`}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className={`${selectedThemes.teamA?.text || 'text-blue-400'} text-xl font-bold flex items-center`}>
-                {currentGame.teamA.name}
-                <Button
-                  onClick={() => setShowThemeSelector('teamA')}
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                >
-                  <Palette className="h-4 w-4" />
-                </Button>
-              </CardTitle>
-              {currentGame.teamA.players.length > 0 && (
-                <div className={`text-sm ${selectedThemes.teamA?.text || 'text-slate-400'} mt-2`}>
-                  {currentGame.teamA.players.filter(p => p).map((player, i) => (
-                    <div key={i}>{player}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className={`text-3xl font-bold ${selectedThemes.teamA?.accent || 'text-white'}`}>
-              {totalScores.teamA}
-            </div>
+          <CardHeader>
+            <CardTitle className={`${selectedThemes.teamA?.text || 'text-blue-400'} text-xl font-bold`}>
+              {currentGame.teamA.name}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -271,7 +229,7 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
                             type="number"
                             min="0"
                             max={round.round}
-                            value={round.teamA.bid || ''}
+                            value={round.teamA.bid === 0 ? '0' : (round.teamA.bid || '')}
                             onChange={(e) => updateRound(round.round, 'teamA', parseInt(e.target.value) || 0, round.teamA.won)}
                             className="w-16 h-8 bg-slate-700 border-slate-600 text-white text-center rounded"
                             disabled={currentGame.status === 'completed'}
@@ -282,7 +240,7 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
                             type="number"
                             min="0"
                             max={round.round}
-                            value={round.teamA.won || ''}
+                            value={round.teamA.won === 0 ? '0' : (round.teamA.won || '')}
                             onChange={(e) => updateRound(round.round, 'teamA', round.teamA.bid, parseInt(e.target.value) || 0)}
                             className="w-16 h-8 bg-slate-700 border-slate-600 text-white text-center rounded"
                             disabled={currentGame.status === 'completed'}
@@ -307,30 +265,10 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
 
         {/* Team B Scorecard */}
         <Card className={`${selectedThemes.teamB?.background || 'bg-slate-800/50'} border-slate-700`}>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className={`${selectedThemes.teamB?.text || 'text-green-400'} text-xl font-bold flex items-center`}>
-                {currentGame.teamB.name}
-                <Button
-                  onClick={() => setShowThemeSelector('teamB')}
-                  variant="ghost"
-                  size="sm"
-                  className="ml-2"
-                >
-                  <Palette className="h-4 w-4" />
-                </Button>
-              </CardTitle>
-              {currentGame.teamB.players.length > 0 && (
-                <div className={`text-sm ${selectedThemes.teamB?.text || 'text-slate-400'} mt-2`}>
-                  {currentGame.teamB.players.filter(p => p).map((player, i) => (
-                    <div key={i}>{player}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className={`text-3xl font-bold ${selectedThemes.teamB?.accent || 'text-white'}`}>
-              {totalScores.teamB}
-            </div>
+          <CardHeader>
+            <CardTitle className={`${selectedThemes.teamB?.text || 'text-green-400'} text-xl font-bold`}>
+              {currentGame.teamB.name}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -358,7 +296,7 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
                             type="number"
                             min="0"
                             max={round.round}
-                            value={round.teamB.bid || ''}
+                            value={round.teamB.bid === 0 ? '0' : (round.teamB.bid || '')}
                             onChange={(e) => updateRound(round.round, 'teamB', parseInt(e.target.value) || 0, round.teamB.won)}
                             className="w-16 h-8 bg-slate-700 border-slate-600 text-white text-center rounded"
                             disabled={currentGame.status === 'completed'}
@@ -369,7 +307,7 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRou
                             type="number"
                             min="0"
                             max={round.round}
-                            value={round.teamB.won || ''}
+                            value={round.teamB.won === 0 ? '0' : (round.teamB.won || '')}
                             onChange={(e) => updateRound(round.round, 'teamB', round.teamB.bid, parseInt(e.target.value) || 0)}
                             className="w-16 h-8 bg-slate-700 border-slate-600 text-white text-center rounded"
                             disabled={currentGame.status === 'completed'}
