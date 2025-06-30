@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Palette, ShoppingBag } from "lucide-react";
 import { Team } from "@/types/game";
@@ -27,9 +26,6 @@ export const ScoreDisplay = ({
   selectedThemes,
   onThemeSelect,
 }: ScoreDisplayProps) => {
-  const isTeamAWinning = scores.teamA > scores.teamB;
-  const isGameFinished = winner !== undefined;
-
   const formatDateTime = (date: Date): string => {
     return date.toLocaleString("en-US", {
       month: "numeric",
@@ -62,10 +58,8 @@ export const ScoreDisplay = ({
           className={`relative border-2 transition-colors ${
             selectedThemes?.teamA?.background || ""
           } ${
-            isGameFinished && winner === teamA.name
+            scores.teamA > scores.teamB
               ? "border-green-500 bg-green-900/20"
-              : !isGameFinished && isTeamAWinning
-              ? "border-blue-500 bg-blue-900/20"
               : "border-slate-700 bg-slate-800/50"
           }`}
         >
@@ -91,7 +85,7 @@ export const ScoreDisplay = ({
                 >
                   {teamA.name}
                 </h3>
-                {isGameFinished && winner === teamA.name && (
+                {winner === teamA.name && (
                   <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
                 )}
               </div>
@@ -138,9 +132,7 @@ export const ScoreDisplay = ({
           className={`relative border-2 transition-colors ${
             selectedThemes?.teamB?.background || ""
           } ${
-            isGameFinished && winner === teamB.name
-              ? "border-green-500 bg-green-900/20"
-              : !isGameFinished && !isTeamAWinning
+            scores.teamB > scores.teamA
               ? "border-green-500 bg-green-900/20"
               : "border-slate-700 bg-slate-800/50"
           }`}
@@ -167,7 +159,7 @@ export const ScoreDisplay = ({
                 >
                   {teamB.name}
                 </h3>
-                {isGameFinished && winner === teamB.name && (
+                {winner === teamB.name && (
                   <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
                 )}
               </div>
