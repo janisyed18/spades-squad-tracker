@@ -11,6 +11,7 @@ interface GameHistoryProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  totalGames: number;
 }
 
 export const GameHistory = ({
@@ -20,6 +21,7 @@ export const GameHistory = ({
   currentPage,
   totalPages,
   onPageChange,
+  totalGames,
 }: GameHistoryProps) => {
   if (games.length === 0) {
     return (
@@ -117,27 +119,32 @@ export const GameHistory = ({
         ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-white">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </Button>
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-slate-400">
+          Showing {games.length} of {totalGames} games
         </div>
-      )}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-white">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GameHistory } from "./GameHistory";
 import { NewGameForm } from "./NewGameForm";
@@ -217,6 +217,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
+              totalGames={filteredAndSortedGames.length}
             />
           </div>
         )}
