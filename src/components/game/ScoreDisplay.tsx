@@ -19,10 +19,10 @@ export const ScoreDisplay = ({ teamA, teamB, scores, bags, winner, createdAt, fi
 
   const formatDateTime = (date: Date): string => {
     return date.toLocaleString('en-US', {
-      month: '1-digit',
-      day: '1-digit',
+      month: 'numeric',
+      day: 'numeric',
       year: 'numeric',
-      hour: '1-digit',
+      hour: 'numeric',
       minute: '2-digit',
       hour12: true
     });

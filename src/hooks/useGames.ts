@@ -35,7 +35,7 @@ export const useGames = () => {
         players: dbGame.team_b_players || []
       },
       rounds: gameRounds,
-      status: dbGame.status,
+      status: dbGame.status as 'active' | 'completed',
       winner: dbGame.winner,
       finalScores: dbGame.final_score_team_a !== null && dbGame.final_score_team_b !== null ? {
         teamA: dbGame.final_score_team_a,
@@ -66,7 +66,7 @@ export const useGames = () => {
 
           if (roundsError) throw roundsError;
 
-          return convertDatabaseGameToGame(game, roundsData);
+          return convertDatabaseGameToGame(game as DatabaseGame, roundsData);
         })
       );
 
@@ -84,9 +84,13 @@ export const useGames = () => {
 
   const createGame = async (teamAName: string, teamBName: string, teamAPlayers: string[], teamBPlayers: string[]) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .insert({
+          user_id: user.id,
           team_a_name: teamAName,
           team_b_name: teamBName,
           team_a_players: teamAPlayers,
@@ -118,7 +122,7 @@ export const useGames = () => {
 
       if (roundsError) throw roundsError;
 
-      const newGame = convertDatabaseGameToGame(gameData, rounds);
+      const newGame = convertDatabaseGameToGame(gameData as DatabaseGame, rounds);
       setGames(prev => [newGame, ...prev]);
       return newGame;
     } catch (error) {

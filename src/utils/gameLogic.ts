@@ -45,14 +45,14 @@ export const calculateBagPenalty = (totalBags: number): number => {
 /**
  * Format date and time for display
  * @param date - Date to format
- * @returns Formatted date string in MM/DD/YYYY H:MM AM/PM format
+ * @returns Formatted date string in M/D/YYYY H:MM AM/PM format
  */
 export const formatDateTime = (date: Date): string => {
   return date.toLocaleString('en-US', {
-    month: '1-digit',
-    day: '1-digit',
+    month: 'numeric',
+    day: 'numeric',
     year: 'numeric',
-    hour: '1-digit',
+    hour: 'numeric',
     minute: '2-digit',
     hour12: true
   });
