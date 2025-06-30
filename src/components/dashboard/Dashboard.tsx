@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GameHistory } from "./GameHistory";
 import { NewGameForm } from "./NewGameForm";
@@ -6,11 +6,14 @@ import { Scorecard } from "../game/Scorecard";
 import { LogOut, Plus, Spade } from "lucide-react";
 import { Game, GameSetup } from "@/types/game";
 import { useGames } from "@/hooks/useGames";
+import { GameFilters } from "./GameFilters";
 
 interface DashboardProps {
   user: string;
   onLogout: () => void;
 }
+
+const GAMES_PER_PAGE = 15;
 
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentView, setCurrentView] = useState<
@@ -19,6 +22,68 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
   const { games, loading, createGame, updateRound, completeGame, deleteGame } =
     useGames();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<"all" | "in-progress" | "completed">(
+    "all"
+  );
+  const [sort, setSort] = useState({ key: "createdAt", order: "desc" });
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredAndSortedGames = games
+    .filter((game) => {
+      if (filter === "in-progress") return game.status === "active";
+      if (filter === "completed") return game.status === "completed";
+      return true;
+    })
+    .filter((game) => {
+      const lowercasedTerm = searchTerm.toLowerCase();
+      return (
+        game.teamA.name.toLowerCase().includes(lowercasedTerm) ||
+        game.teamB.name.toLowerCase().includes(lowercasedTerm) ||
+        game.teamA.players.some((p) =>
+          p.toLowerCase().includes(lowercasedTerm)
+        ) ||
+        game.teamB.players.some((p) => p.toLowerCase().includes(lowercasedTerm))
+      );
+    })
+    .sort((a, b) => {
+      if (sort.key === "createdAt") {
+        return sort.order === "asc"
+          ? a.createdAt.getTime() - b.createdAt.getTime()
+          : b.createdAt.getTime() - a.createdAt.getTime();
+      }
+      if (sort.key === "teamName") {
+        const nameA = `${a.teamA.name} vs ${a.teamB.name}`;
+        const nameB = `${b.teamA.name} vs ${b.teamB.name}`;
+        return sort.order === "asc"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      }
+      if (sort.key === "score") {
+        const scoreA = a.finalScores
+          ? a.finalScores.teamA + a.finalScores.teamB
+          : 0;
+        const scoreB = b.finalScores
+          ? b.finalScores.teamA + b.finalScores.teamB
+          : 0;
+        return sort.order === "asc" ? scoreA - scoreB : scoreB - scoreA;
+      }
+      return 0;
+    });
+
+  const totalPages = Math.ceil(filteredAndSortedGames.length / GAMES_PER_PAGE);
+  const paginatedGames = filteredAndSortedGames.slice(
+    (currentPage - 1) * GAMES_PER_PAGE,
+    currentPage * GAMES_PER_PAGE
+  );
+
+  const handleSortChange = (key: string) => {
+    setSort((prev) => ({
+      key,
+      order: prev.key === key && prev.order === "desc" ? "asc" : "desc",
+    }));
+  };
 
   const handleNewGame = async (setup: GameSetup) => {
     try {
@@ -137,10 +202,21 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
                 New Game
               </Button>
             </div>
+            <GameFilters
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              filter={filter}
+              onFilterChange={setFilter}
+              sort={sort}
+              onSortChange={handleSortChange}
+            />
             <GameHistory
-              games={games}
+              games={paginatedGames}
               onViewGame={handleViewGame}
               onDeleteGame={handleDeleteGame}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
           </div>
         )}
