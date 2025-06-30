@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { GameHistory } from "./GameHistory";
 import { NewGameForm } from "./NewGameForm";
@@ -13,7 +13,7 @@ interface DashboardProps {
   onLogout: () => void;
 }
 
-const GAMES_PER_PAGE = 15;
+const GAMES_PER_PAGE = 10;
 
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentView, setCurrentView] = useState<
