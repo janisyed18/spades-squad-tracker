@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Trophy } from 'lucide-react';
 import { Game } from '@/types/game';
+import { formatDateTime } from '@/utils/gameLogic';
 
 interface GameHistoryProps {
   games: Game[];
@@ -36,7 +37,7 @@ export const GameHistory = ({ games, onViewGame }: GameHistoryProps) => {
               </Badge>
             </div>
             <CardDescription className="text-slate-400">
-              {game.createdAt.toLocaleDateString()}
+              {formatDateTime(game.createdAt)}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

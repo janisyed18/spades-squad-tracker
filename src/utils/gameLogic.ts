@@ -3,7 +3,7 @@
  * Calculate the score for a round based on Spades rules
  * @param bid - Number of tricks bid
  * @param won - Number of tricks actually won
- * @returns The score for this round
+ * @returns The score for this round (excluding bags)
  */
 export const calculateScore = (bid: number, won: number): number => {
   if (bid === 0 || won === 0) return 0;
@@ -15,8 +15,8 @@ export const calculateScore = (bid: number, won: number): number => {
     // Failed to make bid: lose 10 points per bid
     return -bid * 10;
   } else {
-    // Made more than bid: 10 points per bid + 1 point per extra trick (bag)
-    return bid * 10 + (won - bid);
+    // Made more than bid: 10 points per bid (bags are counted separately)
+    return bid * 10;
   }
 };
 
@@ -40,4 +40,20 @@ export const calculateBags = (bid: number, won: number): number => {
  */
 export const calculateBagPenalty = (totalBags: number): number => {
   return Math.floor(totalBags / 5) * 50;
+};
+
+/**
+ * Format date and time for display
+ * @param date - Date to format
+ * @returns Formatted date string in MM/DD/YYYY H:MM AM/PM format
+ */
+export const formatDateTime = (date: Date): string => {
+  return date.toLocaleString('en-US', {
+    month: '1-digit',
+    day: '1-digit',
+    year: 'numeric',
+    hour: '1-digit',
+    minute: '2-digit',
+    hour12: true
+  });
 };

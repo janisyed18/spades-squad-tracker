@@ -12,9 +12,10 @@ interface ScorecardProps {
   game: Game;
   onGameComplete: (game: Game) => void;
   onBackToDashboard: () => void;
+  onUpdateRound?: (gameId: string, roundNumber: number, team: 'teamA' | 'teamB', bid: number, won: number, bags: number, score: number) => void;
 }
 
-export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: ScorecardProps) => {
+export const Scorecard = ({ game, onGameComplete, onBackToDashboard, onUpdateRound }: ScorecardProps) => {
   const [currentGame, setCurrentGame] = useState<Game>(game);
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
   const [totalBags, setTotalBags] = useState({ teamA: 0, teamB: 0 });
@@ -35,9 +36,13 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
     bagPenaltyA = Math.floor(bagsA / 5) * 50;
     bagPenaltyB = Math.floor(bagsB / 5) * 50;
     
+    // Add individual bag points to score (1 point per bag)
+    const totalBagsScoreA = bagsA;
+    const totalBagsScoreB = bagsB;
+    
     setTotalScores({ 
-      teamA: scoreA - bagPenaltyA, 
-      teamB: scoreB - bagPenaltyB 
+      teamA: scoreA + totalBagsScoreA - bagPenaltyA, 
+      teamB: scoreB + totalBagsScoreB - bagPenaltyB 
     });
     setTotalBags({ 
       teamA: bagsA % 5, 
@@ -45,14 +50,15 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
     });
   }, [currentGame.rounds]);
 
-  const updateRound = (roundNumber: number, team: 'teamA' | 'teamB', bid: number, won: number) => {
+  const updateRound = async (roundNumber: number, team: 'teamA' | 'teamB', bid: number, won: number) => {
+    const bags = calculateBags(bid, won);
+    const score = calculateScore(bid, won);
+    
+    // Update local state
     setCurrentGame(prev => ({
       ...prev,
       rounds: prev.rounds.map(round => {
         if (round.round === roundNumber) {
-          const bags = calculateBags(bid, won);
-          const score = calculateScore(bid, won);
-          
           return {
             ...round,
             [team]: { bid, won, bags, score }
@@ -61,6 +67,11 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
         return round;
       })
     }));
+
+    // Update database if callback provided
+    if (onUpdateRound) {
+      await onUpdateRound(currentGame.id, roundNumber, team, bid, won, bags, score);
+    }
   };
 
   const handleCompleteGame = () => {
@@ -70,15 +81,18 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
       ...currentGame,
       status: 'completed',
       winner,
-      finalScores: totalScores
+      finalScores: totalScores,
+      finishedAt: new Date()
     };
     
     onGameComplete(completedGame);
   };
 
   const isGameComplete = currentGame.rounds.every(round => 
-    round.teamA.bid > 0 && round.teamA.won >= 0 && 
-    round.teamB.bid > 0 && round.teamB.won >= 0
+    round.teamA.bid >= 0 && round.teamA.won >= 0 && 
+    round.teamB.bid >= 0 && round.teamB.won >= 0 &&
+    (round.teamA.bid > 0 || round.teamA.won === 0) &&
+    (round.teamB.bid > 0 || round.teamB.won === 0)
   );
 
   return (
@@ -95,9 +109,24 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
             <ArrowLeft className="h-4 w-4 mr-2" />
             Dashboard
           </Button>
-          <h2 className="text-2xl font-bold text-white">
-            {currentGame.teamA.name} vs {currentGame.teamB.name}
-          </h2>
+          <div>
+            <h2 className="text-2xl font-bold text-white">
+              {currentGame.teamA.name} vs {currentGame.teamB.name}
+            </h2>
+            {/* Display player names */}
+            <div className="text-sm text-slate-400 mt-1 space-y-1">
+              {currentGame.teamA.players.length > 0 && (
+                <div>
+                  <span className="text-blue-400">{currentGame.teamA.name}:</span> {currentGame.teamA.players.filter(p => p).join(', ')}
+                </div>
+              )}
+              {currentGame.teamB.players.length > 0 && (
+                <div>
+                  <span className="text-green-400">{currentGame.teamB.name}:</span> {currentGame.teamB.players.filter(p => p).join(', ')}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
         {isGameComplete && currentGame.status !== 'completed' && (
@@ -118,6 +147,8 @@ export const Scorecard = ({ game, onGameComplete, onBackToDashboard }: Scorecard
         scores={totalScores}
         bags={totalBags}
         winner={currentGame.winner}
+        createdAt={currentGame.createdAt}
+        finishedAt={currentGame.finishedAt}
       />
 
       {/* Rounds Table */}

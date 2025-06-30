@@ -9,7 +9,119 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      games: {
+        Row: {
+          created_at: string
+          final_score_team_a: number | null
+          final_score_team_b: number | null
+          finished_at: string | null
+          id: string
+          status: string
+          team_a_name: string
+          team_a_players: string[] | null
+          team_b_name: string
+          team_b_players: string[] | null
+          user_id: string
+          winner: string | null
+        }
+        Insert: {
+          created_at?: string
+          final_score_team_a?: number | null
+          final_score_team_b?: number | null
+          finished_at?: string | null
+          id?: string
+          status?: string
+          team_a_name: string
+          team_a_players?: string[] | null
+          team_b_name: string
+          team_b_players?: string[] | null
+          user_id: string
+          winner?: string | null
+        }
+        Update: {
+          created_at?: string
+          final_score_team_a?: number | null
+          final_score_team_b?: number | null
+          finished_at?: string | null
+          id?: string
+          status?: string
+          team_a_name?: string
+          team_a_players?: string[] | null
+          team_b_name?: string
+          team_b_players?: string[] | null
+          user_id?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          username: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          username?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      rounds: {
+        Row: {
+          game_id: string
+          id: string
+          round_number: number
+          team_a_bags: number | null
+          team_a_bid: number | null
+          team_a_score: number | null
+          team_a_won: number | null
+          team_b_bags: number | null
+          team_b_bid: number | null
+          team_b_score: number | null
+          team_b_won: number | null
+        }
+        Insert: {
+          game_id: string
+          id?: string
+          round_number: number
+          team_a_bags?: number | null
+          team_a_bid?: number | null
+          team_a_score?: number | null
+          team_a_won?: number | null
+          team_b_bags?: number | null
+          team_b_bid?: number | null
+          team_b_score?: number | null
+          team_b_won?: number | null
+        }
+        Update: {
+          game_id?: string
+          id?: string
+          round_number?: number
+          team_a_bags?: number | null
+          team_a_bid?: number | null
+          team_a_score?: number | null
+          team_a_won?: number | null
+          team_b_bags?: number | null
+          team_b_bid?: number | null
+          team_b_score?: number | null
+          team_b_won?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rounds_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

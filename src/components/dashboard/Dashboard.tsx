@@ -6,6 +6,7 @@ import { NewGameForm } from './NewGameForm';
 import { Scorecard } from '../game/Scorecard';
 import { LogOut, Plus, Spade } from 'lucide-react';
 import { Game, GameSetup } from '@/types/game';
+import { useGames } from '@/hooks/useGames';
 
 interface DashboardProps {
   user: string;
@@ -15,49 +16,28 @@ interface DashboardProps {
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'newGame' | 'game'>('dashboard');
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
-  const [games, setGames] = useState<Game[]>([
-    {
-      id: '1',
-      teamA: { name: 'Team Alpha', players: ['Alice', 'Bob'] },
-      teamB: { name: 'Team Beta', players: ['Charlie', 'Diana'] },
-      rounds: [],
-      status: 'completed',
-      winner: 'Team Alpha',
-      finalScores: { teamA: 340, teamB: 280 },
-      createdAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      teamA: { name: 'Spade Masters', players: ['John', 'Jane'] },
-      teamB: { name: 'Card Sharks', players: ['Mike', 'Sarah'] },
-      rounds: [],
-      status: 'completed',
-      winner: 'Card Sharks',
-      finalScores: { teamA: 290, teamB: 360 },
-      createdAt: new Date('2024-01-20')
-    }
-  ]);
+  const { games, loading, createGame, updateRound, completeGame } = useGames();
 
-  const handleNewGame = (setup: GameSetup) => {
-    const newGame: Game = {
-      id: Date.now().toString(),
-      teamA: setup.teamA,
-      teamB: setup.teamB,
-      rounds: Array.from({ length: 13 }, (_, i) => ({
-        round: i + 1,
-        teamA: { bid: 0, won: 0, bags: 0, score: 0 },
-        teamB: { bid: 0, won: 0, bags: 0, score: 0 }
-      })),
-      status: 'active',
-      createdAt: new Date()
-    };
-    
-    setCurrentGame(newGame);
-    setCurrentView('game');
+  const handleNewGame = async (setup: GameSetup) => {
+    try {
+      const newGame = await createGame(
+        setup.teamA.name,
+        setup.teamB.name,
+        setup.teamA.players,
+        setup.teamB.players
+      );
+      setCurrentGame(newGame);
+      setCurrentView('game');
+    } catch (error) {
+      console.error('Error creating new game:', error);
+      alert('Failed to create new game. Please try again.');
+    }
   };
 
-  const handleGameComplete = (completedGame: Game) => {
-    setGames(prev => [completedGame, ...prev]);
+  const handleGameComplete = async (completedGame: Game) => {
+    if (completedGame.finalScores && completedGame.winner) {
+      await completeGame(completedGame.id, completedGame.winner, completedGame.finalScores);
+    }
     setCurrentGame(null);
     setCurrentView('dashboard');
   };
@@ -66,6 +46,18 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     setCurrentGame(game);
     setCurrentView('game');
   };
+
+  const handleUpdateRound = async (gameId: string, roundNumber: number, team: 'teamA' | 'teamB', bid: number, won: number, bags: number, score: number) => {
+    await updateRound(gameId, roundNumber, team, bid, won, bags, score);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white">Loading games...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -121,6 +113,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
             game={currentGame}
             onGameComplete={handleGameComplete}
             onBackToDashboard={() => setCurrentView('dashboard')}
+            onUpdateRound={handleUpdateRound}
           />
         )}
       </main>
