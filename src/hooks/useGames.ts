@@ -102,7 +102,7 @@ export const useGames = () => {
 
       if (gameError) throw gameError;
 
-      // Create 13 rounds for the game
+      // Create 13 rounds for the game with proper ID generation
       const rounds = Array.from({ length: 13 }, (_, i) => ({
         game_id: gameData.id,
         round_number: i + 1,
@@ -116,13 +116,14 @@ export const useGames = () => {
         team_b_score: 0
       }));
 
-      const { error: roundsError } = await supabase
+      const { data: roundsData, error: roundsError } = await supabase
         .from('rounds')
-        .insert(rounds);
+        .insert(rounds)
+        .select();
 
       if (roundsError) throw roundsError;
 
-      const newGame = convertDatabaseGameToGame(gameData as DatabaseGame, rounds);
+      const newGame = convertDatabaseGameToGame(gameData as DatabaseGame, roundsData || []);
       setGames(prev => [newGame, ...prev]);
       return newGame;
     } catch (error) {
@@ -153,7 +154,6 @@ export const useGames = () => {
 
       if (error) throw error;
 
-      // Update local state
       setGames(prev => prev.map(game => {
         if (game.id === gameId) {
           return {
@@ -192,7 +192,6 @@ export const useGames = () => {
 
       if (error) throw error;
 
-      // Update local state
       setGames(prev => prev.map(game => {
         if (game.id === gameId) {
           return {
@@ -211,12 +210,29 @@ export const useGames = () => {
     }
   };
 
+  const deleteGame = async (gameId: string) => {
+    try {
+      const { error } = await supabase
+        .from('games')
+        .delete()
+        .eq('id', gameId);
+
+      if (error) throw error;
+
+      setGames(prev => prev.filter(game => game.id !== gameId));
+    } catch (error) {
+      console.error('Error deleting game:', error);
+      throw error;
+    }
+  };
+
   return {
     games,
     loading,
     createGame,
     updateRound,
     completeGame,
+    deleteGame,
     refetchGames: fetchGames
   };
 };

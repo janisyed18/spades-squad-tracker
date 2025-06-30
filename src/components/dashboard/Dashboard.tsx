@@ -16,7 +16,7 @@ interface DashboardProps {
 export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'newGame' | 'game'>('dashboard');
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
-  const { games, loading, createGame, updateRound, completeGame } = useGames();
+  const { games, loading, createGame, updateRound, completeGame, deleteGame } = useGames();
 
   const handleNewGame = async (setup: GameSetup) => {
     try {
@@ -45,6 +45,17 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const handleViewGame = (game: Game) => {
     setCurrentGame(game);
     setCurrentView('game');
+  };
+
+  const handleDeleteGame = async (gameId: string) => {
+    if (confirm('Are you sure you want to delete this game? This action cannot be undone.')) {
+      try {
+        await deleteGame(gameId);
+      } catch (error) {
+        console.error('Error deleting game:', error);
+        alert('Failed to delete game. Please try again.');
+      }
+    }
   };
 
   const handleUpdateRound = async (gameId: string, roundNumber: number, team: 'teamA' | 'teamB', bid: number, won: number, bags: number, score: number) => {
@@ -97,7 +108,11 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
                 New Game
               </Button>
             </div>
-            <GameHistory games={games} onViewGame={handleViewGame} />
+            <GameHistory 
+              games={games} 
+              onViewGame={handleViewGame} 
+              onDeleteGame={handleDeleteGame}
+            />
           </div>
         )}
 
