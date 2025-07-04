@@ -113,6 +113,22 @@ export const Scorecard = ({
     bid: number,
     won: number
   ) => {
+    const currentRound = currentGame.rounds.find(
+      (r) => r.round === roundNumber
+    );
+    if (!currentRound) return;
+
+    const otherTeam = team === "teamA" ? "teamB" : "teamA";
+    const otherTeamWon = currentRound[otherTeam].won;
+
+    if (won + otherTeamWon > roundNumber) {
+      won = roundNumber - otherTeamWon;
+    }
+
+    if (won < 0) {
+      won = 0;
+    }
+
     const isValid = validateRoundInputs(roundNumber, bid, won);
     const errorKey = `${roundNumber}-${team}`;
 
