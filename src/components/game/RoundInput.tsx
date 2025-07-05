@@ -41,7 +41,8 @@ export const RoundInput = ({
 
   return (
     <tr className="border-b border-slate-700 hover:bg-slate-700/30">
-      <td className="p-2 text-white font-medium">{round.round}</td>
+      {/* Round column - black bold */}
+      <td className="p-2 text-black font-bold">{round.round}</td>
 
       <td className="p-2">
         <IntegerStepper
@@ -59,7 +60,8 @@ export const RoundInput = ({
           disabled={disabled}
         />
       </td>
-      <td className="p-2 text-center text-yellow-400">
+      {/* Bags column - black bold */}
+      <td className="p-2 text-center text-black font-bold">
         {round[team].bags > 0 ? round[team].bags : "-"}
       </td>
       <td className="p-2 text-center">
