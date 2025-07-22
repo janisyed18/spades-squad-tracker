@@ -47,9 +47,18 @@ export const GameHistory = ({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white flex items-center">
-                  <span className="text-blue-400">{game.teamA.name}</span>
-                  <span className="mx-2 text-slate-400">vs</span>
-                  <span className="text-green-400">{game.teamB.name}</span>
+                  {game.teams.map((team, index) => (
+                    <span key={team.id}>
+                      <span className={
+                        ['text-blue-400', 'text-green-400', 'text-red-400', 'text-yellow-400', 'text-purple-400', 'text-pink-400', 'text-indigo-400', 'text-orange-400'][index % 8]
+                      }>
+                        {team.name}
+                      </span>
+                      {index < game.teams.length - 1 && (
+                        <span className="mx-2 text-slate-400">vs</span>
+                      )}
+                    </span>
+                  ))}
                   {game.status === "completed" && game.winner && (
                     <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
                   )}
@@ -97,7 +106,7 @@ export const GameHistory = ({
                   </span>
                   <span className="text-white font-medium">
                     {game.finalScores
-                      ? `${game.finalScores.teamA} - ${game.finalScores.teamB}`
+                      ? Object.values(game.finalScores).join(" - ")
                       : "—"}
                   </span>
                 </div>
