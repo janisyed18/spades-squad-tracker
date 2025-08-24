@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Palette, ShoppingBag } from "lucide-react";
 import { Team } from "@/types/game";
+import type { Theme } from "./ThemeSelector";
 
 interface ScoreDisplayProps {
   teamA: Team;
@@ -11,7 +12,7 @@ interface ScoreDisplayProps {
   winner?: string;
   createdAt?: Date;
   finishedAt?: Date;
-  selectedThemes?: { teamA?: any; teamB?: any };
+  selectedThemes?: Partial<Record<'teamA' | 'teamB', Theme>>;
   onThemeSelect?: (team: "teamA" | "teamB") => void;
 }
 

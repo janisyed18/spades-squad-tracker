@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { Game } from '@/types/game';
 
-type Theme = {
+export type Theme = {
   id: string;
   name: string;
   background: string;

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Game, DatabaseGame, DatabaseRound } from '@/types/game';
 
@@ -46,28 +46,21 @@ export const useGames = () => {
     };
   };
 
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     try {
       setLoading(true);
       const { data: gamesData, error: gamesError } = await supabase
         .from('games')
-        .select('*')
+        .select('*, rounds(*)')
         .order('created_at', { ascending: false });
 
       if (gamesError) throw gamesError;
 
-      const gamesWithRounds = await Promise.all(
-        gamesData.map(async (game) => {
-          const { data: roundsData, error: roundsError } = await supabase
-            .from('rounds')
-            .select('*')
-            .eq('game_id', game.id)
-            .order('round_number');
-
-          if (roundsError) throw roundsError;
-
-          return convertDatabaseGameToGame(game as DatabaseGame, roundsData);
-        })
+      const gamesWithRounds = (gamesData || []).map((game) =>
+        convertDatabaseGameToGame(
+          game as DatabaseGame,
+          ((game as unknown as { rounds: DatabaseRound[] | null }).rounds) || []
+        )
       );
 
       setGames(gamesWithRounds);
@@ -76,11 +69,11 @@ export const useGames = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchGames();
-  }, []);
+  }, [fetchGames]);
 
   const createGame = async (teamAName: string, teamBName: string, teamAPlayers: string[], teamBPlayers: string[]) => {
     try {
