@@ -1,30 +1,38 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Users, Plus, X } from 'lucide-react';
-import { GameSetup } from '@/types/game';
-import { z } from 'zod';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Users, Plus, X } from "lucide-react";
+import { GameSetup } from "@/types/game";
+import { z } from "zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormField,
   FormItem,
   FormLabel,
   FormControl,
-  FormMessage
-} from '@/components/ui/form';
+  FormMessage,
+} from "@/components/ui/form";
 
 interface NewGameFormProps {
   onStartGame: (setup: GameSetup) => void;
   onCancel: () => void;
 }
 
-const playerSchema = z.object({ name: z.string().min(1, 'Player name is required') });
+const playerSchema = z.object({
+  name: z.string().min(1, "Player name is required"),
+});
 const teamSchema = z.object({
-  name: z.string().min(1, 'Team name is required'),
-  players: z.array(playerSchema).min(1).max(10)
+  name: z.string().min(1, "Team name is required"),
+  players: z.array(playerSchema).min(1).max(10),
 });
 const gameSetupSchema = z.object({ teamA: teamSchema, teamB: teamSchema });
 type GameSetupForm = z.infer<typeof gameSetupSchema>;
@@ -33,24 +41,30 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
   const form = useForm<GameSetupForm>({
     resolver: zodResolver(gameSetupSchema),
     defaultValues: {
-      teamA: { name: '', players: [{ name: '' }] },
-      teamB: { name: '', players: [{ name: '' }] }
-    }
+      teamA: { name: "", players: [{ name: "" }] },
+      teamB: { name: "", players: [{ name: "" }] },
+    },
   });
 
-  const teamAPlayers = useFieldArray({ control: form.control, name: 'teamA.players' });
-  const teamBPlayers = useFieldArray({ control: form.control, name: 'teamB.players' });
+  const teamAPlayers = useFieldArray({
+    control: form.control,
+    name: "teamA.players",
+  });
+  const teamBPlayers = useFieldArray({
+    control: form.control,
+    name: "teamB.players",
+  });
 
   const onSubmit = (values: GameSetupForm) => {
     const finalSetup: GameSetup = {
       teamA: {
         name: values.teamA.name.trim(),
-        players: values.teamA.players.map(p => p.name.trim()).filter(Boolean)
+        players: values.teamA.players.map((p) => p.name.trim()).filter(Boolean),
       },
       teamB: {
         name: values.teamB.name.trim(),
-        players: values.teamB.players.map(p => p.name.trim()).filter(Boolean)
-      }
+        players: values.teamB.players.map((p) => p.name.trim()).filter(Boolean),
+      },
     };
     onStartGame(finalSetup);
   };
@@ -74,7 +88,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             {/* Team A */}
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-blue-900/50 border-blue-800">
               <CardHeader>
                 <CardTitle className="text-blue-400 flex items-center">
                   <Users className="h-5 w-5 mr-2" />
@@ -90,11 +104,13 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                   name="teamA.name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Team Name *</FormLabel>
+                      <FormLabel className="text-slate-300">
+                        Team Name *
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          className="bg-slate-700 border-slate-600 text-white"
+                          className="bg-blue-900/50 border-blue-800 text-slate-200"
                           placeholder="Enter team name"
                         />
                       </FormControl>
@@ -114,7 +130,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                             <FormControl>
                               <Input
                                 {...field}
-                                className="bg-slate-700 border-slate-600 text-white"
+                                className="bg-blue-900/50 border-blue-800 text-slate-200"
                                 placeholder={`Player ${index + 1}`}
                               />
                             </FormControl>
@@ -128,7 +144,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                           onClick={() => teamAPlayers.remove(index)}
                           variant="outline"
                           size="sm"
-                          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                          className="border-blue-700 text-slate-300 hover:bg-blue-800"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -138,10 +154,10 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                   {teamAPlayers.fields.length < 10 && (
                     <Button
                       type="button"
-                      onClick={() => teamAPlayers.append({ name: '' })}
+                      onClick={() => teamAPlayers.append({ name: "" })}
                       variant="outline"
                       size="sm"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                      className="border-blue-700 text-slate-300 hover:bg-blue-800"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Player
@@ -152,7 +168,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
             </Card>
 
             {/* Team B */}
-            <Card className="bg-slate-800/50 border-slate-700">
+            <Card className="bg-blue-900/50 border-blue-800">
               <CardHeader>
                 <CardTitle className="text-green-400 flex items-center">
                   <Users className="h-5 w-5 mr-2" />
@@ -168,11 +184,13 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                   name="teamB.name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-slate-300">Team Name *</FormLabel>
+                      <FormLabel className="text-slate-300">
+                        Team Name *
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          className="bg-slate-700 border-slate-600 text-white"
+                          className="bg-blue-900/50 border-blue-800 text-slate-200"
                           placeholder="Enter team name"
                         />
                       </FormControl>
@@ -192,7 +210,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                             <FormControl>
                               <Input
                                 {...field}
-                                className="bg-slate-700 border-slate-600 text-white"
+                                className="bg-blue-900/50 border-blue-800 text-slate-200"
                                 placeholder={`Player ${index + 1}`}
                               />
                             </FormControl>
@@ -206,7 +224,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                           onClick={() => teamBPlayers.remove(index)}
                           variant="outline"
                           size="sm"
-                          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                          className="border-blue-700 text-slate-300 hover:bg-blue-800"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -216,10 +234,10 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                   {teamBPlayers.fields.length < 10 && (
                     <Button
                       type="button"
-                      onClick={() => teamBPlayers.append({ name: '' })}
+                      onClick={() => teamBPlayers.append({ name: "" })}
                       variant="outline"
                       size="sm"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                      className="border-blue-700 text-slate-300 hover:bg-blue-800"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Player
@@ -235,13 +253,13 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
               type="button"
               onClick={onCancel}
               variant="outline"
-              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="border-blue-700 text-slate-300 hover:bg-blue-800"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 px-8"
+              className="bg-green-600 hover:bg-green-700 text-white px-8"
             >
               Start Game
             </Button>

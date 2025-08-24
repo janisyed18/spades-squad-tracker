@@ -152,34 +152,34 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Loading games...</div>
+      <div className="min-h-screen flex items-center justify-center bg-blue-950">
+        <div className="text-slate-200">Loading games...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-blue-950 text-slate-200">
       {/* Header */}
-      <header className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
+      <header className="bg-blue-900/50 backdrop-blur-sm border-b border-blue-800">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button
               onClick={handleHomeClick}
               variant="ghost"
-              className="flex items-center space-x-2 text-white hover:bg-transparent"
+              className="flex items-center space-x-2 text-slate-200 hover:bg-transparent"
             >
               <Spade className="h-6 w-6 text-blue-400" />
               <h1 className="text-xl font-bold">Spades Scorecard</h1>
             </Button>
           </div>
           <div className="flex items-center space-x-4">
-            <span className="text-slate-300">Welcome, {user}</span>
+            <span className="text-slate-400">Welcome, {user}</span>
             <Button
               onClick={onLogout}
               variant="outline"
               size="sm"
-              className="border-slate-600 text-slate-300 hover:bg-slate-700"
+              className="border-blue-700 text-slate-300 hover:bg-blue-800"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout
@@ -196,7 +196,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
               <h2 className="text-2xl font-bold text-white">Your Games</h2>
               <Button
                 onClick={() => setCurrentView("newGame")}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 New Game

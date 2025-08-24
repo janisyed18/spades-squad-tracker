@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Trophy, AlertTriangle } from "lucide-react";
-import { Game, Round } from "@/types/game";
+import { ArrowLeft, Trophy } from "lucide-react";
+import { Game } from "@/types/game";
 import { RoundInput } from "./RoundInput";
 import { ScoreDisplay } from "./ScoreDisplay";
 import { GameCompleteModal } from "./GameCompleteModal";
-import { ThemeSelector } from "./ThemeSelector";
 import { calculateScore, calculateBags } from "@/utils/gameLogic";
 
 interface ScorecardProps {
@@ -24,14 +23,6 @@ interface ScorecardProps {
   ) => void;
 }
 
-type Theme = {
-  id: string;
-  name: string;
-  background: string;
-  text: string;
-  accent: string;
-};
-
 export const Scorecard = ({
   game,
   onGameComplete,
@@ -42,36 +33,7 @@ export const Scorecard = ({
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
   const [totalBags, setTotalBags] = useState({ teamA: 0, teamB: 0 });
   const [showCompleteModal, setShowCompleteModal] = useState(false);
-  const [selectedThemes, setSelectedThemes] = useState<{
-    teamA?: Theme;
-    teamB?: Theme;
-  }>({});
-  const [showThemeSelector, setShowThemeSelector] = useState<
-    "teamA" | "teamB" | null
-  >(null);
-  const [roundErrors, setRoundErrors] = useState<{ [key: string]: boolean }>(
-    {}
-  );
 
-  // Load saved themes from localStorage
-  useEffect(() => {
-    const savedThemes = localStorage.getItem(`game-themes-${currentGame.id}`);
-    if (savedThemes) {
-      setSelectedThemes(JSON.parse(savedThemes));
-    }
-  }, [currentGame.id]);
-
-  // Save themes to localStorage whenever they change
-  useEffect(() => {
-    if (Object.keys(selectedThemes).length > 0) {
-      localStorage.setItem(
-        `game-themes-${currentGame.id}`,
-        JSON.stringify(selectedThemes)
-      );
-    }
-  }, [selectedThemes, currentGame.id]);
-
-  // Fix scoring calculation - don't add bag points to score
   useEffect(() => {
     let scoreA = 0,
       scoreB = 0,
@@ -79,33 +41,24 @@ export const Scorecard = ({
       bagsB = 0;
 
     currentGame.rounds.forEach((round) => {
-      scoreA += round.teamA.score; // Only round score, no bag points
-      scoreB += round.teamB.score; // Only round score, no bag points
+      scoreA += round.teamA.score;
+      scoreB += round.teamB.score;
       bagsA += round.teamA.bags;
       bagsB += round.teamB.bags;
     });
 
-    // Apply bag penalties (every 5 bags = -50 points)
-    const bagPenaltyA = Math.floor(bagsA / 5) * 50;
-    const bagPenaltyB = Math.floor(bagsB / 5) * 50;
+    const bagPenaltyA = Math.floor(bagsA / 10) * 100;
+    const bagPenaltyB = Math.floor(bagsB / 10) * 100;
 
     setTotalScores({
-      teamA: scoreA - bagPenaltyA, // Only subtract penalties, don't add bag points
-      teamB: scoreB - bagPenaltyB, // Only subtract penalties, don't add bag points
+      teamA: scoreA - bagPenaltyA,
+      teamB: scoreB - bagPenaltyB,
     });
     setTotalBags({
-      teamA: bagsA % 5,
-      teamB: bagsB % 5,
+      teamA: bagsA % 10,
+      teamB: bagsB % 10,
     });
   }, [currentGame.rounds]);
-
-  const validateRoundInputs = (
-    roundNumber: number,
-    bid: number,
-    won: number
-  ) => {
-    return bid <= roundNumber && won <= roundNumber && bid >= 0 && won >= 0;
-  };
 
   const updateRound = async (
     roundNumber: number,
@@ -113,46 +66,16 @@ export const Scorecard = ({
     bid: number,
     won: number
   ) => {
-    const currentRound = currentGame.rounds.find(
-      (r) => r.round === roundNumber
-    );
-    if (!currentRound) return;
-
-    const otherTeam = team === "teamA" ? "teamB" : "teamA";
-    const otherTeamWon = currentRound[otherTeam].won;
-
-    if (won + otherTeamWon > roundNumber) {
-      won = roundNumber - otherTeamWon;
-    }
-
-    if (won < 0) {
-      won = 0;
-    }
-
-    const isValid = validateRoundInputs(roundNumber, bid, won);
-    const errorKey = `${roundNumber}-${team}`;
-
-    setRoundErrors((prev) => ({
-      ...prev,
-      [errorKey]: !isValid,
-    }));
-
-    if (!isValid) return;
-
     const bags = calculateBags(bid, won);
     const score = calculateScore(bid, won);
 
     setCurrentGame((prev) => ({
       ...prev,
-      rounds: prev.rounds.map((round) => {
-        if (round.round === roundNumber) {
-          return {
-            ...round,
-            [team]: { bid, won, bags, score },
-          };
-        }
-        return round;
-      }),
+      rounds: prev.rounds.map((round) =>
+        round.round === roundNumber
+          ? { ...round, [team]: { bid, won, bags, score } }
+          : round
+      ),
     }));
 
     if (onUpdateRound) {
@@ -190,55 +113,43 @@ export const Scorecard = ({
     onGameComplete(completedGame);
   };
 
-  const handleThemeSelect = (theme: Theme, team: "teamA" | "teamB") => {
-    setSelectedThemes((prev) => ({
-      ...prev,
-      [team]: theme,
-    }));
-    setShowThemeSelector(null);
-  };
-
-  const availableThemes = (team: "teamA" | "teamB") => {
-    const otherTeamTheme =
-      team === "teamA" ? selectedThemes.teamB : selectedThemes.teamA;
-    return []; // Not used in new implementation
-  };
-
-  const isGameComplete = currentGame.rounds.every(
-    (round) =>
-      round.teamA.bid >= 0 &&
-      round.teamA.won >= 0 &&
-      round.teamB.bid >= 0 &&
-      round.teamB.won >= 0 &&
-      validateRoundInputs(round.round, round.teamA.bid, round.teamA.won) &&
-      validateRoundInputs(round.round, round.teamB.bid, round.teamB.won)
-  );
+  const isGameComplete =
+    currentGame.rounds.length === 10 &&
+    currentGame.rounds.every(
+      (round) =>
+        round.teamA.bid >= 0 &&
+        round.teamA.won >= 0 &&
+        round.teamB.bid >= 0 &&
+        round.teamB.won >= 0
+    );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6 animate-fade-in p-4 rounded-lg">
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Button
             onClick={onBackToDashboard}
             variant="ghost"
             size="sm"
-            className="text-slate-400 hover:text-white mr-4"
+            className="text-slate-300 hover:text-white mr-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Dashboard
           </Button>
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-white animate-slide-in-left">
               {currentGame.teamA.name} vs {currentGame.teamB.name}
             </h2>
+            <p className="text-sm text-slate-400">
+              Started: {new Date(currentGame.createdAt).toLocaleString()}
+            </p>
           </div>
         </div>
 
         {isGameComplete && currentGame.status !== "completed" && (
           <Button
             onClick={handleCompleteGame}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 animate-pulse"
           >
             <Trophy className="h-4 w-4 mr-2" />
             Complete Game
@@ -246,181 +157,59 @@ export const Scorecard = ({
         )}
       </div>
 
-      {/* Score Display */}
       <ScoreDisplay
         teamA={currentGame.teamA}
         teamB={currentGame.teamB}
         scores={totalScores}
         bags={totalBags}
         winner={currentGame.winner}
-        createdAt={currentGame.createdAt}
-        finishedAt={currentGame.finishedAt}
-        selectedThemes={selectedThemes}
-        onThemeSelect={setShowThemeSelector}
       />
 
-      {/* Team Scorecards */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Team A Scorecard */}
-        <Card
-          className={`${
-            selectedThemes.teamA?.background || "bg-slate-800/50"
-          } border-slate-700`}
-        >
-          <CardHeader>
-            <CardTitle
-              className={`${
-                selectedThemes.teamA?.text || "text-blue-400"
-              } text-xl font-bold`}
-            >
-              {currentGame.teamA.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-600">
-                    <th
-                      className={`text-left ${
-                        selectedThemes.teamA?.text || "text-slate-300"
-                      } p-2`}
-                    >
-                      Round
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamA?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Bid
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamA?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Won
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamA?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Bags
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamA?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Score
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentGame.rounds.map((round) => (
-                    <RoundInput
-                      key={round.round}
-                      round={round}
-                      team="teamA"
-                      onUpdate={updateRound}
-                      disabled={currentGame.status === "completed"}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Team B Scorecard */}
-        <Card
-          className={`${
-            selectedThemes.teamB?.background || "bg-slate-800/50"
-          } border-slate-700`}
-        >
-          <CardHeader>
-            <CardTitle
-              className={`${
-                selectedThemes.teamB?.text || "text-green-400"
-              } text-xl font-bold`}
-            >
-              {currentGame.teamB.name}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-600">
-                    <th
-                      className={`text-left ${
-                        selectedThemes.teamB?.text || "text-slate-300"
-                      } p-2`}
-                    >
-                      Round
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamB?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Bid
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamB?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Won
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamB?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Bags
-                    </th>
-                    <th
-                      className={`text-center ${
-                        selectedThemes.teamB?.text || "text-slate-400"
-                      } p-2`}
-                    >
-                      Score
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentGame.rounds.map((round) => (
-                    <RoundInput
-                      key={round.round}
-                      round={round}
-                      team="teamB"
-                      onUpdate={updateRound}
-                      disabled={currentGame.status === "completed"}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {(["teamA", "teamB"] as const).map((team) => (
+          <Card
+            key={team}
+            className="bg-blue-900/50 border-blue-800 transform hover:scale-105 transition-transform duration-300"
+          >
+            <CardHeader>
+              <CardTitle
+                className={`${
+                  team === "teamA" ? "text-blue-400" : "text-green-400"
+                } text-xl font-bold`}
+              >
+                {currentGame[team].name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-blue-800">
+                      <th className="p-2 text-left text-slate-300">Round</th>
+                      <th className="p-2 text-center text-slate-400">Bid</th>
+                      <th className="p-2 text-center text-slate-400">Won</th>
+                      <th className="p-2 text-center text-slate-400">Bags</th>
+                      <th className="p-2 text-right text-slate-300">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentGame.rounds.map((round) => (
+                      <RoundInput
+                        key={round.round}
+                        round={round}
+                        team={team}
+                        onUpdate={updateRound}
+                        disabled={currentGame.status === "completed"}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Theme Selector Modal */}
-      {showThemeSelector && (
-        <ThemeSelector
-          team={showThemeSelector}
-          themes={availableThemes(showThemeSelector)}
-          onSelect={(theme) => handleThemeSelect(theme, showThemeSelector)}
-          onClose={() => setShowThemeSelector(null)}
-          currentGame={currentGame}
-          previewTeam={showThemeSelector}
-        />
-      )}
-
-      {/* Game Complete Modal */}
       {showCompleteModal && (
         <GameCompleteModal
           winner={
@@ -428,6 +217,7 @@ export const Scorecard = ({
               ? currentGame.teamA.name
               : currentGame.teamB.name
           }
+          scores={totalScores}
           onClose={handleModalClose}
         />
       )}
