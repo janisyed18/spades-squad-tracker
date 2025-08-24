@@ -25,7 +25,7 @@ export const GameHistory = ({
 }: GameHistoryProps) => {
   if (games.length === 0) {
     return (
-      <Card className="bg-slate-800/50 border-slate-700">
+      <Card className="bg-blue-900/50 border-blue-800">
         <CardContent className="p-8 text-center">
           <p className="text-slate-400">
             No games found. Try adjusting your filters.
@@ -42,13 +42,13 @@ export const GameHistory = ({
           <Card
             key={game.id}
             onClick={() => onViewGame(game)}
-            className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 transition-colors cursor-pointer"
+            className="bg-blue-900/50 border-blue-800 hover:bg-blue-900/70 transition-colors cursor-pointer"
           >
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="text-white flex items-center">
+                <CardTitle className="text-slate-200 flex items-center">
                   <span className="text-blue-400">{game.teamA.name}</span>
-                  <span className="mx-2 text-slate-400">vs</span>
+                  <span className="mx-2 text-slate-500">vs</span>
                   <span className="text-green-400">{game.teamB.name}</span>
                   {game.status === "completed" && game.winner && (
                     <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
@@ -62,7 +62,7 @@ export const GameHistory = ({
                     }}
                     variant="ghost"
                     size="sm"
-                    className="text-red-400 hover:bg-red-900/10 hover:text-red-300"
+                    className="text-red-400 hover:bg-red-900/20 hover:text-red-300"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -95,7 +95,7 @@ export const GameHistory = ({
                       ? "Final Score:"
                       : "Current Scores:"}
                   </span>
-                  <span className="text-white font-medium">
+                  <span className="text-slate-200 font-medium">
                     {game.finalScores
                       ? `${game.finalScores.teamA} - ${game.finalScores.teamB}`
                       : "—"}
@@ -129,16 +129,18 @@ export const GameHistory = ({
               variant="outline"
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
+              className="border-blue-700 text-slate-300 hover:bg-blue-800"
             >
               Previous
             </Button>
-            <span className="text-white">
+            <span className="text-slate-300">
               Page {currentPage} of {totalPages}
             </span>
             <Button
               variant="outline"
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
+              className="border-blue-700 text-slate-300 hover:bg-blue-800"
             >
               Next
             </Button>

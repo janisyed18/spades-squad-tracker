@@ -5,11 +5,13 @@ import { Trophy, X } from "lucide-react";
 
 interface GameCompleteModalProps {
   winner: string;
+  scores: { teamA: number; teamB: number };
   onClose: () => void;
 }
 
 export const GameCompleteModal = ({
   winner,
+  scores,
   onClose,
 }: GameCompleteModalProps) => {
   const [showConfetti, setShowConfetti] = useState(true);
@@ -51,6 +53,20 @@ export const GameCompleteModal = ({
               <p className="text-xl text-yellow-100 font-semibold drop-shadow-md animate-fade-in animation-delay-500">
                 Congratulations on your victory!
               </p>
+            </div>
+          </div>
+
+          <div className="mb-4 text-white text-lg font-semibold">
+            Final Scores:
+          </div>
+          <div className="flex justify-center space-x-4 mb-6">
+            <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
+              <div className="text-gray-800 font-bold">Team A</div>
+              <div className="text-2xl">{scores.teamA}</div>
+            </div>
+            <div className="bg-white/90 rounded-lg px-4 py-2 shadow-md">
+              <div className="text-gray-800 font-bold">Team B</div>
+              <div className="text-2xl">{scores.teamB}</div>
             </div>
           </div>
 

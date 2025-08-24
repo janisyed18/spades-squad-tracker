@@ -27,31 +27,50 @@ export const GameFilters = ({
           placeholder="Search by team or player name..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="bg-slate-700 border-slate-600 text-white w-full"
+          className="bg-blue-900/50 border-blue-800 text-slate-200 w-full"
         />
       </div>
       <div className="flex items-center gap-2">
         <Button
           variant={filter === "all" ? "default" : "outline"}
           onClick={() => onFilterChange("all")}
+          className={
+            filter === "all"
+              ? "bg-blue-600 text-white"
+              : "bg-transparent border-blue-700 text-slate-300"
+          }
         >
           All
         </Button>
         <Button
           variant={filter === "in-progress" ? "default" : "outline"}
           onClick={() => onFilterChange("in-progress")}
+          className={
+            filter === "in-progress"
+              ? "bg-blue-600 text-white"
+              : "bg-transparent border-blue-700 text-slate-300"
+          }
         >
           In Progress
         </Button>
         <Button
           variant={filter === "completed" ? "default" : "outline"}
           onClick={() => onFilterChange("completed")}
+          className={
+            filter === "completed"
+              ? "bg-blue-600 text-white"
+              : "bg-transparent border-blue-700 text-slate-300"
+          }
         >
           Completed
         </Button>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" onClick={() => onSortChange("createdAt")}>
+      <div className="flex items-center gap-2 text-slate-400">
+        <Button
+          variant="ghost"
+          onClick={() => onSortChange("createdAt")}
+          className="hover:bg-blue-800"
+        >
           Date{" "}
           {sort.key === "createdAt" &&
             (sort.order === "asc" ? (
@@ -60,7 +79,11 @@ export const GameFilters = ({
               <ArrowDown className="h-4 w-4" />
             ))}
         </Button>
-        <Button variant="ghost" onClick={() => onSortChange("teamName")}>
+        <Button
+          variant="ghost"
+          onClick={() => onSortChange("teamName")}
+          className="hover:bg-blue-800"
+        >
           Team Name{" "}
           {sort.key === "teamName" &&
             (sort.order === "asc" ? (
@@ -69,7 +92,11 @@ export const GameFilters = ({
               <ArrowDown className="h-4 w-4" />
             ))}
         </Button>
-        <Button variant="ghost" onClick={() => onSortChange("score")}>
+        <Button
+          variant="ghost"
+          onClick={() => onSortChange("score")}
+          className="hover:bg-blue-800"
+        >
           Score{" "}
           {sort.key === "score" &&
             (sort.order === "asc" ? (

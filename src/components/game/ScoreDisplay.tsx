@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Palette, ShoppingBag } from "lucide-react";
 import { Team } from "@/types/game";
+import type { Theme } from "./ThemeSelector";
 
 interface ScoreDisplayProps {
   teamA: Team;
@@ -11,7 +12,7 @@ interface ScoreDisplayProps {
   winner?: string;
   createdAt?: Date;
   finishedAt?: Date;
-  selectedThemes?: { teamA?: any; teamB?: any };
+  selectedThemes?: Partial<Record<"teamA" | "teamB", Theme>>;
   onThemeSelect?: (team: "teamA" | "teamB") => void;
 }
 
@@ -55,149 +56,61 @@ export const ScoreDisplay = ({
       <div className="grid md:grid-cols-2 gap-4">
         {/* Team A Score */}
         <Card
-          className={`relative border-2 transition-colors ${
-            selectedThemes?.teamA?.background || ""
-          } ${
+          className={`relative border-2 transition-all duration-300 ${
             scores.teamA > scores.teamB
-              ? "border-green-500 bg-green-900/20"
+              ? "border-blue-500 bg-blue-900/30 shadow-lg shadow-blue-500/20"
               : "border-slate-700 bg-slate-800/50"
           }`}
         >
-          <CardContent className="p-6 pt-10">
-            {onThemeSelect && (
-              <Button
-                onClick={() => onThemeSelect("teamA")}
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2"
-              >
-                <Palette className="h-4 w-4" />
-              </Button>
-            )}
-
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              {/* Left Section: Team Name & Icons */}
-              <div className="flex items-center">
-                <h3
-                  className={`text-5xl font-bold ${
-                    selectedThemes?.teamA?.text || "text-blue-400"
-                  }`}
-                >
-                  {teamA.name}
-                </h3>
-                {winner === teamA.name && (
-                  <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
-                )}
-              </div>
-
-              {/* Center Section: Score & Bags */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`text-6xl font-bold ${
-                    selectedThemes?.teamA?.accent || "text-white"
-                  }`}
-                >
+              <h3 className="text-5xl font-bold text-blue-400">{teamA.name}</h3>
+              <div className="text-right">
+                <div className="text-6xl font-bold text-blue-300">
                   {scores.teamA}
                 </div>
-                <div
-                  className={`flex items-center text-sm ${
-                    selectedThemes?.teamA?.accent || "text-yellow-400"
-                  }`}
-                >
+                <div className="flex items-center justify-end text-sm text-blue-400">
                   <ShoppingBag className="h-4 w-4 mr-1" />
                   {bags.teamA} bags
                 </div>
               </div>
-
-              {/* Right Section: Player Names */}
-              {teamA.players.length > 0 && (
-                <div
-                  className={`text-sm ${
-                    selectedThemes?.teamA?.text || "text-slate-400"
-                  } max-w-[30%] text-left`}
-                >
-                  {teamA.players
-                    .filter((p) => p)
-                    .map((player, i) => (
-                      <div key={i}>{player}</div>
-                    ))}
-                </div>
-              )}
             </div>
+            {winner === teamA.name && (
+              <div className="absolute top-2 right-2">
+                <Trophy className="h-6 w-6 text-yellow-400 animate-pulse" />
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Team B Score */}
         <Card
-          className={`relative border-2 transition-colors ${
-            selectedThemes?.teamB?.background || ""
-          } ${
+          className={`relative border-2 transition-all duration-300 ${
             scores.teamB > scores.teamA
-              ? "border-green-500 bg-green-900/20"
+              ? "border-green-500 bg-green-900/30 shadow-lg shadow-green-500/20"
               : "border-slate-700 bg-slate-800/50"
           }`}
         >
-          <CardContent className="p-6 pt-10">
-            {onThemeSelect && (
-              <Button
-                onClick={() => onThemeSelect("teamB")}
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2"
-              >
-                <Palette className="h-4 w-4" />
-              </Button>
-            )}
-
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
-              {/* Left Section: Team Name & Icons */}
-              <div className="flex items-center">
-                <h3
-                  className={`text-5xl font-bold ${
-                    selectedThemes?.teamB?.text || "text-green-400"
-                  }`}
-                >
-                  {teamB.name}
-                </h3>
-                {winner === teamB.name && (
-                  <Trophy className="h-5 w-5 text-yellow-400 ml-2" />
-                )}
-              </div>
-
-              {/* Center Section: Score & Bags */}
-              <div className="flex flex-col items-center">
-                <div
-                  className={`text-6xl font-bold ${
-                    selectedThemes?.teamB?.accent || "text-white"
-                  }`}
-                >
+              <h3 className="text-5xl font-bold text-green-400">
+                {teamB.name}
+              </h3>
+              <div className="text-right">
+                <div className="text-6xl font-bold text-green-300">
                   {scores.teamB}
                 </div>
-                <div
-                  className={`flex items-center text-sm ${
-                    selectedThemes?.teamB?.accent || "text-yellow-400"
-                  }`}
-                >
+                <div className="flex items-center justify-end text-sm text-green-400">
                   <ShoppingBag className="h-4 w-4 mr-1" />
                   {bags.teamB} bags
                 </div>
               </div>
-
-              {/* Right Section: Player Names */}
-              {teamB.players.length > 0 && (
-                <div
-                  className={`text-sm ${
-                    selectedThemes?.teamB?.text || "text-slate-400"
-                  } max-w-[30%] text-left`}
-                >
-                  {teamB.players
-                    .filter((p) => p)
-                    .map((player, i) => (
-                      <div key={i}>{player}</div>
-                    ))}
-                </div>
-              )}
             </div>
+            {winner === teamB.name && (
+              <div className="absolute top-2 right-2">
+                <Trophy className="h-6 w-6 text-yellow-400 animate-pulse" />
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
