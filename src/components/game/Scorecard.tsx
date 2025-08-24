@@ -38,7 +38,41 @@ export const Scorecard = ({
   onBackToDashboard,
   onUpdateRound,
 }: ScorecardProps) => {
-  const [currentGame, setCurrentGame] = useState<Game>(game);
+  const [currentGame, setCurrentGame] = useState<Game>(() => {
+    // If no rounds, initialize with one round
+    if (!game.rounds || game.rounds.length === 0) {
+      return {
+        ...game,
+        rounds: [
+          {
+            round: 1,
+            teamA: { bid: 0, won: 0, bags: 0, score: 0 },
+            teamB: { bid: 0, won: 0, bags: 0, score: 0 },
+          },
+        ],
+      };
+    }
+    return game;
+  });
+  // Add round handler
+  const handleAddRound = () => {
+    if (
+      currentGame.rounds.length < currentGame.maxRounds &&
+      currentGame.status !== "completed"
+    ) {
+      setCurrentGame((prev) => ({
+        ...prev,
+        rounds: [
+          ...prev.rounds,
+          {
+            round: prev.rounds.length + 1,
+            teamA: { bid: 0, won: 0, bags: 0, score: 0 },
+            teamB: { bid: 0, won: 0, bags: 0, score: 0 },
+          },
+        ],
+      }));
+    }
+  };
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
   const [totalBags, setTotalBags] = useState({ teamA: 0, teamB: 0 });
   const [showCompleteModal, setShowCompleteModal] = useState(false);
@@ -234,16 +268,26 @@ export const Scorecard = ({
             </h2>
           </div>
         </div>
-
-        {isGameComplete && currentGame.status !== "completed" && (
+        <div className="flex gap-2">
+          <Button
+            onClick={handleAddRound}
+            disabled={
+              currentGame.status === "completed" ||
+              currentGame.rounds.length >= currentGame.maxRounds
+            }
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            + Add Round
+          </Button>
           <Button
             onClick={handleCompleteGame}
+            disabled={currentGame.status === "completed"}
             className="bg-green-600 hover:bg-green-700"
           >
             <Trophy className="h-4 w-4 mr-2" />
-            Complete Game
+            End Game
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Score Display */}
