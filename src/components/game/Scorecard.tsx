@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ArrowLeft, Trophy, AlertTriangle } from "lucide-react";
 import { Game, Round } from "@/types/game";
 import { RoundInput } from "./RoundInput";
@@ -89,6 +99,7 @@ export const Scorecard = ({
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
   const [totalBags, setTotalBags] = useState({ teamA: 0, teamB: 0 });
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showConfirmEndGame, setShowConfirmEndGame] = useState(false);
   const [selectedThemes, setSelectedThemes] = useState<{
     teamA?: Theme;
     teamB?: Theme;
@@ -212,6 +223,11 @@ export const Scorecard = ({
   };
 
   const handleCompleteGame = () => {
+    setShowConfirmEndGame(true);
+  };
+
+  const handleConfirmEndGame = () => {
+    setShowConfirmEndGame(false);
     setShowCompleteModal(true);
   };
 
@@ -460,6 +476,32 @@ export const Scorecard = ({
           End Game
         </Button>
       </div>
+
+      {/* End Game Confirmation Dialog */}
+      <AlertDialog
+        open={showConfirmEndGame}
+        onOpenChange={setShowConfirmEndGame}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End Game Confirmation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to end the game? This action cannot be
+              undone. Current scores are:
+              {"\n"}
+              {currentGame.teamA.name}: {totalScores.teamA}
+              {"\n"}
+              {currentGame.teamB.name}: {totalScores.teamB}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmEndGame}>
+              End Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Theme Selector Modal */}
       {showThemeSelector && (
