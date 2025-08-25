@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Game, DatabaseGame, DatabaseRound } from "@/types/game";
 
@@ -52,7 +52,7 @@ export const useGames = () => {
     };
   };
 
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     try {
       setLoading(true);
       const { data: gamesData, error: gamesError } = await supabase
@@ -71,10 +71,20 @@ export const useGames = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const fetchGameDetails = async (gameId: string) => {
     try {
+      // First, fetch the game data to ensure we have the latest game information
+      const { data: gameData, error: gameError } = await supabase
+        .from("games")
+        .select("*")
+        .eq("id", gameId)
+        .single();
+
+      if (gameError) throw gameError;
+
+      // Then fetch the rounds data
       const { data: roundsData, error: roundsError } = await supabase
         .from("rounds")
         .select("*")
@@ -83,39 +93,26 @@ export const useGames = () => {
 
       if (roundsError) throw roundsError;
 
-      setGames((prev) =>
-        prev.map((game) => {
-          if (game.id === gameId) {
-            return {
-              ...game,
-              rounds: roundsData.map((round) => ({
-                round: round.round_number,
-                teamA: {
-                  bid: round.team_a_bid,
-                  won: round.team_a_won,
-                  bags: round.team_a_bags,
-                  score: round.team_a_score,
-                },
-                teamB: {
-                  bid: round.team_b_bid,
-                  won: round.team_b_won,
-                  bags: round.team_b_bags,
-                  score: round.team_b_score,
-                },
-              })),
-            };
-          }
-          return game;
-        })
+      // Convert the game data including the rounds
+      const updatedGame = convertDatabaseGameToGame(
+        gameData as DatabaseGame,
+        roundsData
       );
+
+      // Update the games state with the new data
+      setGames((prev) =>
+        prev.map((game) => (game.id === gameId ? updatedGame : game))
+      );
+
+      return updatedGame;
     } catch (error) {
       console.error("Error fetching game details:", error);
+      throw error;
     }
   };
-
   useEffect(() => {
     fetchGames();
-  }, []);
+  }, [fetchGames]);
 
   const createGame = async (
     teamAName: string,

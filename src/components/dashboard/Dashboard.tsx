@@ -122,8 +122,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   };
 
   const handleViewGame = async (game: Game) => {
-    await fetchGameDetails(game.id);
-    setCurrentGame(game);
+    const updatedGame = await fetchGameDetails(game.id);
+    setCurrentGame(updatedGame || game);
     setCurrentView("game");
   };
 
