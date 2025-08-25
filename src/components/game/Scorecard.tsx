@@ -260,42 +260,20 @@ export const Scorecard = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Button
-            onClick={onBackToDashboard}
-            variant="ghost"
-            size="sm"
-            className="text-slate-400 hover:text-white mr-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Dashboard
-          </Button>
-          <div>
-            <h2 className="text-2xl font-bold text-white">
-              {currentGame.teamA.name} vs {currentGame.teamB.name}
-            </h2>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={handleAddRound}
-            disabled={
-              currentGame.status === "completed" ||
-              currentGame.rounds.length >= currentGame.maxRounds
-            }
-            className="bg-blue-600 hover:bg-blue-700"
-          >
-            + Add Round
-          </Button>
-          <Button
-            onClick={handleCompleteGame}
-            disabled={currentGame.status === "completed"}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Trophy className="h-4 w-4 mr-2" />
-            End Game
-          </Button>
+      <div className="flex items-center">
+        <Button
+          onClick={onBackToDashboard}
+          variant="ghost"
+          size="sm"
+          className="text-slate-400 hover:text-white mr-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Dashboard
+        </Button>
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            {currentGame.teamA.name} vs {currentGame.teamB.name}
+          </h2>
         </div>
       </div>
 
@@ -459,6 +437,28 @@ export const Scorecard = ({
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Game Controls */}
+      <div className="flex justify-center gap-4 mt-6">
+        <Button
+          onClick={handleAddRound}
+          disabled={
+            currentGame.status === "completed" ||
+            currentGame.rounds.length >= currentGame.maxRounds
+          }
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          + Add Round
+        </Button>
+        <Button
+          onClick={handleCompleteGame}
+          disabled={currentGame.status === "completed"}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          <Trophy className="h-4 w-4 mr-2" />
+          End Game
+        </Button>
       </div>
 
       {/* Theme Selector Modal */}
