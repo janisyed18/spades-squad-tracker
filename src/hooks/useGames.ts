@@ -129,33 +129,25 @@ export const useGames = () => {
   const updateRound = async (
     gameId: string,
     roundNumber: number,
-    team: "teamA" | "teamB",
-    bid: number,
-    won: number,
-    bags: number,
-    score: number
+    teamAData: { bid: number; won: number; bags: number; score: number },
+    teamBData: { bid: number; won: number; bags: number; score: number }
   ) => {
     try {
-      const updateData =
-        team === "teamA"
-          ? {
-              team_a_bid: bid,
-              team_a_won: won,
-              team_a_bags: bags,
-              team_a_score: score,
-            }
-          : {
-              team_b_bid: bid,
-              team_b_won: won,
-              team_b_bags: bags,
-              team_b_score: score,
-            };
-
-      const { error } = await supabase
-        .from("rounds")
-        .update(updateData)
-        .eq("game_id", gameId)
-        .eq("round_number", roundNumber);
+      const { error } = await supabase.from("rounds").upsert(
+        {
+          game_id: gameId,
+          round_number: roundNumber,
+          team_a_bid: teamAData.bid,
+          team_a_won: teamAData.won,
+          team_a_bags: teamAData.bags,
+          team_a_score: teamAData.score,
+          team_b_bid: teamBData.bid,
+          team_b_won: teamBData.won,
+          team_b_bags: teamBData.bags,
+          team_b_score: teamBData.score,
+        },
+        { onConflict: "game_id, round_number" }
+      );
 
       if (error) throw error;
 
@@ -168,7 +160,8 @@ export const useGames = () => {
                 if (round.round === roundNumber) {
                   return {
                     ...round,
-                    [team]: { bid, won, bags, score },
+                    teamA: { ...teamAData },
+                    teamB: { ...teamBData },
                   };
                 }
                 return round;

@@ -16,11 +16,8 @@ interface ScorecardProps {
   onUpdateRound?: (
     gameId: string,
     roundNumber: number,
-    team: "teamA" | "teamB",
-    bid: number,
-    won: number,
-    bags: number,
-    score: number
+    teamAData: { bid: number; won: number; bags: number; score: number },
+    teamBData: { bid: number; won: number; bags: number; score: number }
   ) => void;
 }
 
@@ -62,22 +59,31 @@ export const Scorecard = ({
     };
   });
   // Add round handler
-  const handleAddRound = () => {
+  const handleAddRound = async () => {
     if (
       currentGame.rounds.length < currentGame.maxRounds &&
       currentGame.status !== "completed"
     ) {
+      const newRoundNumber = currentGame.rounds.length + 1;
+      const newRound = {
+        round: newRoundNumber,
+        teamA: { bid: 0, won: 0, bags: 0, score: 0 },
+        teamB: { bid: 0, won: 0, bags: 0, score: 0 },
+      };
+
       setCurrentGame((prev) => ({
         ...prev,
-        rounds: [
-          ...prev.rounds,
-          {
-            round: prev.rounds.length + 1,
-            teamA: { bid: 0, won: 0, bags: 0, score: 0 },
-            teamB: { bid: 0, won: 0, bags: 0, score: 0 },
-          },
-        ],
+        rounds: [...prev.rounds, newRound],
       }));
+
+      if (onUpdateRound) {
+        await onUpdateRound(
+          currentGame.id,
+          newRoundNumber,
+          newRound.teamA,
+          newRound.teamB
+        );
+      }
     }
   };
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
@@ -183,28 +189,24 @@ export const Scorecard = ({
     const bags = calculateBags(bid, won);
     const score = calculateScore(bid, won);
 
+    const updatedRoundData = {
+      ...currentRound,
+      [team]: { bid, won, bags, score },
+    };
+
     setCurrentGame((prev) => ({
       ...prev,
-      rounds: prev.rounds.map((round) => {
-        if (round.round === roundNumber) {
-          return {
-            ...round,
-            [team]: { bid, won, bags, score },
-          };
-        }
-        return round;
-      }),
+      rounds: prev.rounds.map((round) =>
+        round.round === roundNumber ? updatedRoundData : round
+      ),
     }));
 
     if (onUpdateRound) {
       await onUpdateRound(
         currentGame.id,
         roundNumber,
-        team,
-        bid,
-        won,
-        bags,
-        score
+        updatedRoundData.teamA,
+        updatedRoundData.teamB
       );
     }
   };
