@@ -91,7 +91,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         setup.teamA.name,
         setup.teamB.name,
         setup.teamA.players,
-        setup.teamB.players
+        setup.teamB.players,
+        setup.maxRounds
       );
       setCurrentGame(newGame);
       setCurrentView("game");

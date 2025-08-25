@@ -52,7 +52,14 @@ export const Scorecard = ({
         ],
       };
     }
-    return game;
+    // If rounds exist, use only those rounds
+    return {
+      ...game,
+      rounds: game.rounds.map((r, idx) => ({
+        ...r,
+        round: idx + 1, // Ensure round numbers are sequential
+      })),
+    };
   });
   // Add round handler
   const handleAddRound = () => {
