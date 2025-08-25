@@ -20,8 +20,15 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     "dashboard" | "newGame" | "game"
   >("dashboard");
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
-  const { games, loading, createGame, updateRound, completeGame, deleteGame } =
-    useGames();
+  const {
+    games,
+    loading,
+    createGame,
+    updateRound,
+    completeGame,
+    deleteGame,
+    fetchGameDetails,
+  } = useGames();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<"all" | "in-progress" | "completed">(
@@ -114,7 +121,8 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     setCurrentView("dashboard");
   };
 
-  const handleViewGame = (game: Game) => {
+  const handleViewGame = async (game: Game) => {
+    await fetchGameDetails(game.id);
     setCurrentGame(game);
     setCurrentView("game");
   };
@@ -137,13 +145,10 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const handleUpdateRound = async (
     gameId: string,
     roundNumber: number,
-    team: "teamA" | "teamB",
-    bid: number,
-    won: number,
-    bags: number,
-    score: number
+    teamAData: { bid: number; won: number; bags: number; score: number },
+    teamBData: { bid: number; won: number; bags: number; score: number }
   ) => {
-    await updateRound(gameId, roundNumber, team, bid, won, bags, score);
+    await updateRound(gameId, roundNumber, teamAData, teamBData);
   };
 
   const handleHomeClick = () => {

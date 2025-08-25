@@ -62,25 +62,54 @@ export const useGames = () => {
 
       if (gamesError) throw gamesError;
 
-      const gamesWithRounds = await Promise.all(
-        gamesData.map(async (game) => {
-          const { data: roundsData, error: roundsError } = await supabase
-            .from("rounds")
-            .select("*")
-            .eq("game_id", game.id)
-            .order("round_number");
-
-          if (roundsError) throw roundsError;
-
-          return convertDatabaseGameToGame(game as DatabaseGame, roundsData);
-        })
+      const gamesWithoutRounds = gamesData.map((game) =>
+        convertDatabaseGameToGame(game as DatabaseGame)
       );
-
-      setGames(gamesWithRounds);
+      setGames(gamesWithoutRounds);
     } catch (error) {
       console.error("Error fetching games:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGameDetails = async (gameId: string) => {
+    try {
+      const { data: roundsData, error: roundsError } = await supabase
+        .from("rounds")
+        .select("*")
+        .eq("game_id", gameId)
+        .order("round_number");
+
+      if (roundsError) throw roundsError;
+
+      setGames((prev) =>
+        prev.map((game) => {
+          if (game.id === gameId) {
+            return {
+              ...game,
+              rounds: roundsData.map((round) => ({
+                round: round.round_number,
+                teamA: {
+                  bid: round.team_a_bid,
+                  won: round.team_a_won,
+                  bags: round.team_a_bags,
+                  score: round.team_a_score,
+                },
+                teamB: {
+                  bid: round.team_b_bid,
+                  won: round.team_b_won,
+                  bags: round.team_b_bags,
+                  score: round.team_b_score,
+                },
+              })),
+            };
+          }
+          return game;
+        })
+      );
+    } catch (error) {
+      console.error("Error fetching game details:", error);
     }
   };
 
@@ -237,5 +266,6 @@ export const useGames = () => {
     completeGame,
     deleteGame,
     refetchGames: fetchGames,
+    fetchGameDetails,
   };
 };
