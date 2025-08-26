@@ -15,14 +15,21 @@ import { GameSetup } from "@/types/game";
 interface NewGameFormProps {
   onStartGame: (setup: GameSetup) => void;
   onCancel: () => void;
+  initialSetup?: GameSetup;
 }
 
-export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
-  const [setup, setSetup] = useState<GameSetup>({
-    teamA: { name: "", players: [""] },
-    teamB: { name: "", players: [""] },
-    maxRounds: 13,
-  });
+export const NewGameForm = ({
+  onStartGame,
+  onCancel,
+  initialSetup,
+}: NewGameFormProps) => {
+  const [setup, setSetup] = useState<GameSetup>(
+    initialSetup || {
+      teamA: { name: "", players: [""] },
+      teamB: { name: "", players: [""] },
+      maxRounds: 13,
+    }
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

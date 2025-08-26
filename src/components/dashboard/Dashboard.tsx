@@ -200,6 +200,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         <NewGameForm
           onStartGame={handleShowSeating}
           onCancel={handleBackToDashboard}
+          initialSetup={gameSetup || undefined}
         />
       </div>
     );
@@ -258,6 +259,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
         <NewGameForm
           onStartGame={handleShowSeating}
           onCancel={handleBackToDashboard}
+          initialSetup={gameSetup || undefined}
         />
       )}
 
