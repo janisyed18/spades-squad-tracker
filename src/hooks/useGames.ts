@@ -49,6 +49,8 @@ export const useGames = () => {
       createdAt: new Date(dbGame.created_at),
       finishedAt: dbGame.finished_at ? new Date(dbGame.finished_at) : undefined,
       maxRounds: dbGame.max_rounds,
+      deleted: dbGame.deleted,
+      deletedAt: dbGame.deleted_at ? new Date(dbGame.deleted_at) : undefined,
     };
   };
 
@@ -58,6 +60,7 @@ export const useGames = () => {
       const { data: gamesData, error: gamesError } = await supabase
         .from("games")
         .select("*")
+        .eq("deleted", false)
         .order("created_at", { ascending: false });
 
       if (gamesError) throw gamesError;
@@ -276,7 +279,10 @@ export const useGames = () => {
 
   const deleteGame = async (gameId: string) => {
     try {
-      const { error } = await supabase.from("games").delete().eq("id", gameId);
+      const { error } = await supabase
+        .from("games")
+        .update({ deleted: true, deleted_at: new Date().toISOString() })
+        .eq("id", gameId);
 
       if (error) throw error;
 

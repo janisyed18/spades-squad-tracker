@@ -27,6 +27,8 @@ export interface Game {
   createdAt: Date;
   finishedAt?: Date;
   maxRounds: number;
+  deleted?: boolean;
+  deletedAt?: Date;
 }
 
 export interface GameSetup {
@@ -48,6 +50,8 @@ export interface DatabaseGame {
   final_score_team_b?: number;
   created_at: string;
   finished_at?: string;
+  deleted: boolean;
+  deleted_at?: string;
   max_rounds: number;
 }
 
