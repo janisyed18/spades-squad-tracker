@@ -15,14 +15,21 @@ import { GameSetup } from "@/types/game";
 interface NewGameFormProps {
   onStartGame: (setup: GameSetup) => void;
   onCancel: () => void;
+  initialSetup?: GameSetup;
 }
 
-export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
-  const [setup, setSetup] = useState<GameSetup>({
-    teamA: { name: "", players: [""] },
-    teamB: { name: "", players: [""] },
-    maxRounds: 13,
-  });
+export const NewGameForm = ({
+  onStartGame,
+  onCancel,
+  initialSetup,
+}: NewGameFormProps) => {
+  const [setup, setSetup] = useState<GameSetup>(
+    initialSetup || {
+      teamA: { name: "", players: [""] },
+      teamB: { name: "", players: [""] },
+      maxRounds: 13,
+    }
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,26 +116,6 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          <Label htmlFor="max-rounds" className="text-slate-300">
-            Maximum Number of Rounds *
-          </Label>
-          <Input
-            id="max-rounds"
-            type="number"
-            min={1}
-            value={setup.maxRounds}
-            onChange={(e) =>
-              setSetup((prev) => ({
-                ...prev,
-                maxRounds: Number(e.target.value),
-              }))
-            }
-            className="bg-slate-700 border-slate-600 text-white w-40"
-            placeholder="e.g. 13"
-            required
-          />
-        </div>
         <div className="grid md:grid-cols-2 gap-6">
           {/* Team A */}
           <Card className="bg-slate-800/50 border-slate-700">
@@ -263,6 +250,27 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="space-y-4 flex flex-col items-center">
+          <Label htmlFor="max-rounds" className="text-slate-300">
+            Maximum Number of Rounds *
+          </Label>
+          <Input
+            id="max-rounds"
+            type="number"
+            min={1}
+            value={setup.maxRounds}
+            onChange={(e) =>
+              setSetup((prev) => ({
+                ...prev,
+                maxRounds: Number(e.target.value),
+              }))
+            }
+            className="bg-slate-700 border-slate-600 text-white w-40"
+            placeholder="e.g. 13"
+            required
+          />
         </div>
 
         <div className="flex space-x-4 justify-center">
