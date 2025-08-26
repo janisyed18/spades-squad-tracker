@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { GameHistory } from "./GameHistory";
 import { NewGameForm } from "./NewGameForm";
 import { Scorecard } from "../game/Scorecard";
-import { LogOut, Plus, Spade } from "lucide-react";
 import { Game, GameSetup } from "@/types/game";
 import { useGames } from "@/hooks/useGames";
 import { useUser } from "@/hooks/useUser";
 import { GameFilters } from "./GameFilters";
+import { Header } from "@/components/ui/header";
 
 interface DashboardProps {
   user: string;
@@ -169,23 +168,13 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      <Header 
+        userEmail={user}
+        onLogout={onLogout}
+      />
+
       {currentView === "dashboard" && (
         <>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <Spade className="h-8 w-8 text-blue-400" />
-              <h1 className="text-2xl font-bold text-white">Spades Squad</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button onClick={() => setCurrentView("newGame")}>
-                <Plus className="h-4 w-4 mr-2" /> New Game
-              </Button>
-              <Button onClick={onLogout} variant="ghost">
-                <LogOut className="h-4 w-4 mr-2" /> Logout
-              </Button>
-            </div>
-          </div>
-
           <GameFilters
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -196,6 +185,7 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
             showDeleted={showDeleted}
             onShowDeletedChange={setShowDeleted}
             isAdmin={isAdmin}
+            onNewGame={() => setCurrentView("newGame")}
           />
           <GameHistory
             games={paginatedGames}
