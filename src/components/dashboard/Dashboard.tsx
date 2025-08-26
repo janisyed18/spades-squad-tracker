@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { GameHistory } from "./GameHistory";
 import { NewGameForm } from "./NewGameForm";
+import { SeatingArrangement } from "./SeatingArrangement";
 import { Scorecard } from "../game/Scorecard";
 import { Game, GameSetup } from "@/types/game";
 import { useGames } from "@/hooks/useGames";
@@ -19,9 +20,10 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   const { isAdmin } = useUser();
   const [showDeleted, setShowDeleted] = useState(false);
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "newGame" | "game"
+    "dashboard" | "newGame" | "seatingArrangement" | "game"
   >("dashboard");
   const [currentGame, setCurrentGame] = useState<Game | null>(null);
+  const [gameSetup, setGameSetup] = useState<GameSetup | null>(null);
   const {
     games,
     loading,
@@ -123,24 +125,41 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     setCurrentView("dashboard");
   };
 
-  const handleViewGame = async (game: Game) => {
-    const updatedGame = await fetchGameDetails(game.id);
-    setCurrentGame(updatedGame || game);
-    setCurrentView("game");
+  const handleShowSeating = (setup: GameSetup) => {
+    setGameSetup(setup);
+    setCurrentView("seatingArrangement");
   };
 
-  const handleDeleteGame = async (gameId: string) => {
-    if (
-      confirm(
-        "Are you sure you want to delete this game? This action cannot be undone."
-      )
-    ) {
-      try {
-        await deleteGame(gameId);
-      } catch (error) {
-        console.error("Error deleting game:", error);
-        alert("Failed to delete game. Please try again.");
+  const handleStartGame = async (setup: GameSetup) => {
+    try {
+      const newGame = await createGame(
+        setup.teamA.name,
+        setup.teamB.name,
+        setup.teamA.players,
+        setup.teamB.players,
+        setup.maxRounds
+      );
+      if (newGame) {
+        setCurrentGame(newGame);
+        setCurrentView("game");
       }
+    } catch (error) {
+      console.error("Error starting game:", error);
+      // You might want to show an error to the user here
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView("dashboard");
+    setCurrentGame(null);
+    setGameSetup(null);
+  };
+
+  const handleViewGame = async (gameId: string) => {
+    const gameDetails = await fetchGameDetails(gameId);
+    if (gameDetails) {
+      setCurrentGame(gameDetails);
+      setCurrentView("game");
     }
   };
 
@@ -158,6 +177,34 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     setCurrentGame(null);
   };
 
+  const handleCompleteGame = async (
+    gameId: string,
+    winner: string,
+    finalScores: { teamA: number; teamB: number }
+  ) => {
+    await completeGame(gameId, winner, finalScores);
+    const updatedGame = await fetchGameDetails(gameId);
+    if (updatedGame) {
+      setCurrentGame(updatedGame);
+    }
+  };
+
+  const handleDeleteGame = async (gameId: string) => {
+    await deleteGame(gameId);
+    // The useGames hook will update the games list
+  };
+
+  if (currentView === "newGame") {
+    return (
+      <div className="container mx-auto p-4">
+        <NewGameForm
+          onStartGame={handleShowSeating}
+          onCancel={handleBackToDashboard}
+        />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -168,13 +215,13 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-      <Header 
+      <Header
         userEmail={user}
         onLogout={onLogout}
       />
 
       {currentView === "dashboard" && (
-        <>
+        <div>
           <GameFilters
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -187,22 +234,38 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
             isAdmin={isAdmin}
             onNewGame={() => setCurrentView("newGame")}
           />
-          <GameHistory
-            games={paginatedGames}
-            onViewGame={handleViewGame}
-            onDeleteGame={handleDeleteGame}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            totalGames={filteredAndSortedGames.length}
-          />
-        </>
+          <main className="mt-4">
+            {filteredAndSortedGames.length === 0 ? (
+              <div className="text-white text-center py-4">
+                No games found. Adjust your filters or create a new game.
+              </div>
+            ) : (
+              <GameHistory
+                games={paginatedGames}
+                onViewGame={(game) => handleViewGame(game.id)}
+                onDeleteGame={handleDeleteGame}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalGames={filteredAndSortedGames.length}
+              />
+            )}
+          </main>
+        </div>
       )}
 
       {currentView === "newGame" && (
         <NewGameForm
-          onStartGame={handleNewGame}
-          onCancel={() => setCurrentView("dashboard")}
+          onStartGame={handleShowSeating}
+          onCancel={handleBackToDashboard}
+        />
+      )}
+
+      {currentView === "seatingArrangement" && gameSetup && (
+        <SeatingArrangement
+          setup={gameSetup}
+          onStartGame={handleStartGame}
+          onCancel={() => setCurrentView("newGame")}
         />
       )}
 
