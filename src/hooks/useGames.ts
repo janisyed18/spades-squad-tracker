@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Game, DatabaseGame, DatabaseRound } from "@/types/game";
 
-export const useGames = () => {
+export const useGames = (showDeleted: boolean = false) => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,10 +57,15 @@ export const useGames = () => {
   const fetchGames = useCallback(async () => {
     try {
       setLoading(true);
-      const { data: gamesData, error: gamesError } = await supabase
+      let query = supabase
         .from("games")
-        .select("*")
-        .eq("deleted", false)
+        .select("*");
+      
+      if (!showDeleted) {
+        query = query.eq("deleted", false);
+      }
+
+      const { data: gamesData, error: gamesError } = await query
         .order("created_at", { ascending: false });
 
       if (gamesError) throw gamesError;
@@ -74,7 +79,7 @@ export const useGames = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showDeleted]);
 
   const fetchGameDetails = async (gameId: string) => {
     try {

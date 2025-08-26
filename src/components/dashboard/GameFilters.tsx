@@ -9,6 +9,9 @@ interface GameFiltersProps {
   onFilterChange: (filter: "all" | "in-progress" | "completed") => void;
   sort: { key: string; order: "asc" | "desc" };
   onSortChange: (key: string) => void;
+  showDeleted?: boolean;
+  onShowDeletedChange?: (show: boolean) => void;
+  isAdmin?: boolean;
 }
 
 export const GameFilters = ({
@@ -18,6 +21,9 @@ export const GameFilters = ({
   onFilterChange,
   sort,
   onSortChange,
+  showDeleted,
+  onShowDeletedChange,
+  isAdmin,
 }: GameFiltersProps) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -50,6 +56,16 @@ export const GameFilters = ({
           Completed
         </Button>
       </div>
+      {isAdmin && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant={showDeleted ? "default" : "outline"}
+            onClick={() => onShowDeletedChange?.(!showDeleted)}
+          >
+            Show Deleted
+          </Button>
+        </div>
+      )}
       <div className="flex items-center gap-2">
         <Button variant="ghost" onClick={() => onSortChange("createdAt")}>
           Date{" "}
