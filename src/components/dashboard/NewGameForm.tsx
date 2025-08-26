@@ -1,82 +1,101 @@
-
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Users, Plus, X } from 'lucide-react';
-import { GameSetup } from '@/types/game';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, Users, Plus, X } from "lucide-react";
+import { GameSetup } from "@/types/game";
 
 interface NewGameFormProps {
   onStartGame: (setup: GameSetup) => void;
   onCancel: () => void;
+  initialSetup?: GameSetup;
 }
 
-export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
-  const [setup, setSetup] = useState<GameSetup>({
-    teamA: { name: '', players: [''] },
-    teamB: { name: '', players: [''] }
-  });
+export const NewGameForm = ({
+  onStartGame,
+  onCancel,
+  initialSetup,
+}: NewGameFormProps) => {
+  const [setup, setSetup] = useState<GameSetup>(
+    initialSetup || {
+      teamA: { name: "", players: [""] },
+      teamB: { name: "", players: [""] },
+      maxRounds: 13,
+    }
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!setup.teamA.name.trim() || !setup.teamB.name.trim()) {
-      alert('Please enter team names');
+      alert("Please enter team names");
       return;
     }
-    
+    if (!setup.maxRounds || setup.maxRounds < 1) {
+      alert("Please enter a valid maximum number of rounds (at least 1)");
+      return;
+    }
     const finalSetup: GameSetup = {
       teamA: {
         name: setup.teamA.name.trim(),
-        players: setup.teamA.players.filter(p => p.trim())
+        players: setup.teamA.players.filter((p) => p.trim()),
       },
       teamB: {
         name: setup.teamB.name.trim(),
-        players: setup.teamB.players.filter(p => p.trim())
-      }
+        players: setup.teamB.players.filter((p) => p.trim()),
+      },
+      maxRounds: setup.maxRounds,
     };
-    
     onStartGame(finalSetup);
   };
 
-  const updateTeamName = (team: 'teamA' | 'teamB', name: string) => {
-    setSetup(prev => ({
+  const updateTeamName = (team: "teamA" | "teamB", name: string) => {
+    setSetup((prev) => ({
       ...prev,
-      [team]: { ...prev[team], name }
+      [team]: { ...prev[team], name },
     }));
   };
 
-  const updatePlayerName = (team: 'teamA' | 'teamB', index: number, name: string) => {
-    setSetup(prev => ({
+  const updatePlayerName = (
+    team: "teamA" | "teamB",
+    index: number,
+    name: string
+  ) => {
+    setSetup((prev) => ({
       ...prev,
       [team]: {
         ...prev[team],
-        players: prev[team].players.map((p, i) => i === index ? name : p)
-      }
+        players: prev[team].players.map((p, i) => (i === index ? name : p)),
+      },
     }));
   };
 
-  const addPlayer = (team: 'teamA' | 'teamB') => {
+  const addPlayer = (team: "teamA" | "teamB") => {
     if (setup[team].players.length < 10) {
-      setSetup(prev => ({
+      setSetup((prev) => ({
         ...prev,
         [team]: {
           ...prev[team],
-          players: [...prev[team].players, '']
-        }
+          players: [...prev[team].players, ""],
+        },
       }));
     }
   };
 
-  const removePlayer = (team: 'teamA' | 'teamB', index: number) => {
+  const removePlayer = (team: "teamA" | "teamB", index: number) => {
     if (setup[team].players.length > 1) {
-      setSetup(prev => ({
+      setSetup((prev) => ({
         ...prev,
         [team]: {
           ...prev[team],
-          players: prev[team].players.filter((_, i) => i !== index)
-        }
+          players: prev[team].players.filter((_, i) => i !== index),
+        },
       }));
     }
   };
@@ -111,31 +130,35 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="teamA-name" className="text-slate-300">Team Name *</Label>
+                <Label htmlFor="teamA-name" className="text-slate-300">
+                  Team Name *
+                </Label>
                 <Input
                   id="teamA-name"
                   value={setup.teamA.name}
-                  onChange={(e) => updateTeamName('teamA', e.target.value)}
+                  onChange={(e) => updateTeamName("teamA", e.target.value)}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Enter team name"
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-slate-300">Players</Label>
                 {setup.teamA.players.map((player, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Input
                       value={player}
-                      onChange={(e) => updatePlayerName('teamA', index, e.target.value)}
+                      onChange={(e) =>
+                        updatePlayerName("teamA", index, e.target.value)
+                      }
                       className="bg-slate-700 border-slate-600 text-white flex-1"
                       placeholder={`Player ${index + 1}`}
                     />
                     {setup.teamA.players.length > 1 && (
                       <Button
                         type="button"
-                        onClick={() => removePlayer('teamA', index)}
+                        onClick={() => removePlayer("teamA", index)}
                         variant="outline"
                         size="sm"
                         className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -148,7 +171,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                 {setup.teamA.players.length < 10 && (
                   <Button
                     type="button"
-                    onClick={() => addPlayer('teamA')}
+                    onClick={() => addPlayer("teamA")}
                     variant="outline"
                     size="sm"
                     className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -174,31 +197,35 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="teamB-name" className="text-slate-300">Team Name *</Label>
+                <Label htmlFor="teamB-name" className="text-slate-300">
+                  Team Name *
+                </Label>
                 <Input
                   id="teamB-name"
                   value={setup.teamB.name}
-                  onChange={(e) => updateTeamName('teamB', e.target.value)}
+                  onChange={(e) => updateTeamName("teamB", e.target.value)}
                   className="bg-slate-700 border-slate-600 text-white"
                   placeholder="Enter team name"
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-slate-300">Players</Label>
                 {setup.teamB.players.map((player, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Input
                       value={player}
-                      onChange={(e) => updatePlayerName('teamB', index, e.target.value)}
+                      onChange={(e) =>
+                        updatePlayerName("teamB", index, e.target.value)
+                      }
                       className="bg-slate-700 border-slate-600 text-white flex-1"
                       placeholder={`Player ${index + 1}`}
                     />
                     {setup.teamB.players.length > 1 && (
                       <Button
                         type="button"
-                        onClick={() => removePlayer('teamB', index)}
+                        onClick={() => removePlayer("teamB", index)}
                         variant="outline"
                         size="sm"
                         className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -211,7 +238,7 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
                 {setup.teamB.players.length < 10 && (
                   <Button
                     type="button"
-                    onClick={() => addPlayer('teamB')}
+                    onClick={() => addPlayer("teamB")}
                     variant="outline"
                     size="sm"
                     className="border-slate-600 text-slate-300 hover:bg-slate-700"
@@ -223,6 +250,27 @@ export const NewGameForm = ({ onStartGame, onCancel }: NewGameFormProps) => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="space-y-4 flex flex-col items-center">
+          <Label htmlFor="max-rounds" className="text-slate-300">
+            Maximum Number of Rounds *
+          </Label>
+          <Input
+            id="max-rounds"
+            type="number"
+            min={1}
+            value={setup.maxRounds}
+            onChange={(e) =>
+              setSetup((prev) => ({
+                ...prev,
+                maxRounds: Number(e.target.value),
+              }))
+            }
+            className="bg-slate-700 border-slate-600 text-white w-40"
+            placeholder="e.g. 13"
+            required
+          />
         </div>
 
         <div className="flex space-x-4 justify-center">

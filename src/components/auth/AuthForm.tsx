@@ -56,7 +56,13 @@ export const AuthForm = ({ onLogin }: AuthFormProps) => {
         if (error) throw error;
 
         if (data.user) {
-          onLogin(username || data.user.email || "User");
+          // After successful signup, switch to login view
+          setIsLogin(true);
+          setEmail("");
+          setPassword("");
+          setUsername("");
+          // Show a success message
+          setError("Signup successful! Please login with your credentials.");
         }
       }
     } catch (error: any) {

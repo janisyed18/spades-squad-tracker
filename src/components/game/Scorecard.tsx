@@ -1,6 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ArrowLeft, Trophy, AlertTriangle } from "lucide-react";
 import { Game, Round } from "@/types/game";
 import { RoundInput } from "./RoundInput";
@@ -16,11 +26,8 @@ interface ScorecardProps {
   onUpdateRound?: (
     gameId: string,
     roundNumber: number,
-    team: "teamA" | "teamB",
-    bid: number,
-    won: number,
-    bags: number,
-    score: number
+    teamAData: { bid: number; won: number; bags: number; score: number },
+    teamBData: { bid: number; won: number; bags: number; score: number }
   ) => void;
 }
 
@@ -38,10 +45,61 @@ export const Scorecard = ({
   onBackToDashboard,
   onUpdateRound,
 }: ScorecardProps) => {
-  const [currentGame, setCurrentGame] = useState<Game>(game);
+  const [currentGame, setCurrentGame] = useState<Game>(() => {
+    // If no rounds, initialize with one round
+    if (!game.rounds || game.rounds.length === 0) {
+      return {
+        ...game,
+        rounds: [
+          {
+            round: 1,
+            teamA: { bid: 0, won: 0, bags: 0, score: 0 },
+            teamB: { bid: 0, won: 0, bags: 0, score: 0 },
+          },
+        ],
+      };
+    }
+    // If rounds exist, use only those rounds
+    return {
+      ...game,
+      rounds: game.rounds.map((r, idx) => ({
+        ...r,
+        round: idx + 1, // Ensure round numbers are sequential
+      })),
+    };
+  });
+  // Add round handler
+  const handleAddRound = async () => {
+    if (
+      currentGame.rounds.length < currentGame.maxRounds &&
+      currentGame.status !== "completed"
+    ) {
+      const newRoundNumber = currentGame.rounds.length + 1;
+      const newRound = {
+        round: newRoundNumber,
+        teamA: { bid: 0, won: 0, bags: 0, score: 0 },
+        teamB: { bid: 0, won: 0, bags: 0, score: 0 },
+      };
+
+      setCurrentGame((prev) => ({
+        ...prev,
+        rounds: [...prev.rounds, newRound],
+      }));
+
+      if (onUpdateRound) {
+        await onUpdateRound(
+          currentGame.id,
+          newRoundNumber,
+          newRound.teamA,
+          newRound.teamB
+        );
+      }
+    }
+  };
   const [totalScores, setTotalScores] = useState({ teamA: 0, teamB: 0 });
   const [totalBags, setTotalBags] = useState({ teamA: 0, teamB: 0 });
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showConfirmEndGame, setShowConfirmEndGame] = useState(false);
   const [selectedThemes, setSelectedThemes] = useState<{
     teamA?: Theme;
     teamB?: Theme;
@@ -142,33 +200,34 @@ export const Scorecard = ({
     const bags = calculateBags(bid, won);
     const score = calculateScore(bid, won);
 
+    const updatedRoundData = {
+      ...currentRound,
+      [team]: { bid, won, bags, score },
+    };
+
     setCurrentGame((prev) => ({
       ...prev,
-      rounds: prev.rounds.map((round) => {
-        if (round.round === roundNumber) {
-          return {
-            ...round,
-            [team]: { bid, won, bags, score },
-          };
-        }
-        return round;
-      }),
+      rounds: prev.rounds.map((round) =>
+        round.round === roundNumber ? updatedRoundData : round
+      ),
     }));
 
     if (onUpdateRound) {
       await onUpdateRound(
         currentGame.id,
         roundNumber,
-        team,
-        bid,
-        won,
-        bags,
-        score
+        updatedRoundData.teamA,
+        updatedRoundData.teamB
       );
     }
   };
 
   const handleCompleteGame = () => {
+    setShowConfirmEndGame(true);
+  };
+
+  const handleConfirmEndGame = () => {
+    setShowConfirmEndGame(false);
     setShowCompleteModal(true);
   };
 
@@ -217,33 +276,21 @@ export const Scorecard = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Button
-            onClick={onBackToDashboard}
-            variant="ghost"
-            size="sm"
-            className="text-slate-400 hover:text-white mr-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Dashboard
-          </Button>
-          <div>
-            <h2 className="text-2xl font-bold text-white">
-              {currentGame.teamA.name} vs {currentGame.teamB.name}
-            </h2>
-          </div>
+      <div className="flex items-center">
+        <Button
+          onClick={onBackToDashboard}
+          variant="ghost"
+          size="sm"
+          className="text-slate-400 hover:text-white mr-4"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Dashboard
+        </Button>
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            {currentGame.teamA.name} vs {currentGame.teamB.name}
+          </h2>
         </div>
-
-        {isGameComplete && currentGame.status !== "completed" && (
-          <Button
-            onClick={handleCompleteGame}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <Trophy className="h-4 w-4 mr-2" />
-            Complete Game
-          </Button>
-        )}
       </div>
 
       {/* Score Display */}
@@ -407,6 +454,54 @@ export const Scorecard = ({
           </CardContent>
         </Card>
       </div>
+
+      {/* Game Controls */}
+      <div className="flex justify-center gap-4 mt-6">
+        <Button
+          onClick={handleAddRound}
+          disabled={
+            currentGame.status === "completed" ||
+            currentGame.rounds.length >= currentGame.maxRounds
+          }
+          className="bg-blue-600 hover:bg-blue-700"
+        >
+          + Add Round
+        </Button>
+        <Button
+          onClick={handleCompleteGame}
+          disabled={currentGame.status === "completed"}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          <Trophy className="h-4 w-4 mr-2" />
+          End Game
+        </Button>
+      </div>
+
+      {/* End Game Confirmation Dialog */}
+      <AlertDialog
+        open={showConfirmEndGame}
+        onOpenChange={setShowConfirmEndGame}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>End Game Confirmation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to end the game? This action cannot be
+              undone. Current scores are:
+              {"\n"}
+              {currentGame.teamA.name}: {totalScores.teamA}
+              {"\n"}
+              {currentGame.teamB.name}: {totalScores.teamB}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmEndGame}>
+              End Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Theme Selector Modal */}
       {showThemeSelector && (
