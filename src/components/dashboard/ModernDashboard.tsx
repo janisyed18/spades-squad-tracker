@@ -11,14 +11,14 @@ import { Header } from "@/components/ui/header";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-interface DashboardProps {
+interface ModernDashboardProps {
   user: string;
   onLogout: () => void;
 }
 
 const GAMES_PER_PAGE = 10;
 
-export const Dashboard = ({ user, onLogout }: DashboardProps) => {
+export const ModernDashboard = ({ user, onLogout }: ModernDashboardProps) => {
   const { isAdmin } = useUser();
   const [showDeleted, setShowDeleted] = useState(false);
   const [currentView, setCurrentView] = useState<
@@ -98,23 +98,6 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     }));
   };
 
-  const handleNewGame = async (setup: GameSetup) => {
-    try {
-      const newGame = await createGame(
-        setup.teamA.name,
-        setup.teamB.name,
-        setup.teamA.players,
-        setup.teamB.players,
-        setup.maxRounds
-      );
-      setCurrentGame(newGame);
-      setCurrentView("game");
-    } catch (error) {
-      console.error("Error creating new game:", error);
-      alert("Failed to create new game. Please try again.");
-    }
-  };
-
   const handleGameComplete = async (completedGame: Game) => {
     if (completedGame.finalScores && completedGame.winner) {
       await completeGame(
@@ -147,7 +130,6 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
       }
     } catch (error) {
       console.error("Error starting game:", error);
-      // You might want to show an error to the user here
     }
   };
 
@@ -174,56 +156,50 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
     await updateRound(gameId, roundNumber, teamAData, teamBData);
   };
 
-  const handleHomeClick = () => {
-    setCurrentView("dashboard");
-    setCurrentGame(null);
-  };
-
-  const handleCompleteGame = async (
-    gameId: string,
-    winner: string,
-    finalScores: { teamA: number; teamB: number }
-  ) => {
-    await completeGame(gameId, winner, finalScores);
-    const updatedGame = await fetchGameDetails(gameId);
-    if (updatedGame) {
-      setCurrentGame(updatedGame);
-    }
-  };
-
   const handleDeleteGame = async (gameId: string) => {
     await deleteGame(gameId);
-    // The useGames hook will update the games list
   };
-
-  if (currentView === "newGame") {
-    return (
-      <div className="container mx-auto p-4">
-        <FlexibleNewGameForm
-          onStartGame={handleShowSeating}
-          onCancel={handleBackToDashboard}
-        />
-      </div>
-    );
-  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white">Loading games...</div>
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center">
+        <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50 p-8 shadow-lg">
+          <div className="text-foreground text-lg">Loading games...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
       <Header
         userEmail={user}
         onLogout={onLogout}
       />
 
       {currentView === "dashboard" && (
-        <div>
+        <div className="container mx-auto py-8 space-y-8">
+          {/* Modern Header with glass effect */}
+          <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50 p-8 shadow-lg">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h1 className="text-4xl font-bold text-foreground mb-2">
+                  Game Dashboard
+                </h1>
+                <p className="text-muted-foreground text-lg">
+                  Track your Spades mastery journey
+                </p>
+              </div>
+              <Button
+                onClick={() => setCurrentView("newGame")}
+                className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground px-8 py-3 shadow-lg font-medium"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                New Game
+              </Button>
+            </div>
+          </div>
+
           <GameFilters
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
@@ -236,10 +212,15 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
             isAdmin={isAdmin}
             onNewGame={() => setCurrentView("newGame")}
           />
-          <main className="mt-4">
+          
+          <main>
             {filteredAndSortedGames.length === 0 ? (
-              <div className="text-white text-center py-4">
-                No games found. Adjust your filters or create a new game.
+              <div className="text-center py-12">
+                <div className="bg-card/60 backdrop-blur-sm rounded-2xl border border-border/50 p-8 shadow-lg">
+                  <p className="text-muted-foreground text-lg">
+                    No games found. Adjust your filters or create a new game.
+                  </p>
+                </div>
               </div>
             ) : (
               <GameHistory
