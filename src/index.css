@@ -7,6 +7,9 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  #lovable-badge {
+    display: none !important;
+  }
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
