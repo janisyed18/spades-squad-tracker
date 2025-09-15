@@ -1,4 +1,3 @@
-
 export interface Team {
   name: string;
   players: string[];
@@ -22,16 +21,20 @@ export interface Game {
   teamA: Team;
   teamB: Team;
   rounds: Round[];
-  status: 'active' | 'completed';
+  status: "active" | "completed";
   winner?: string;
   finalScores?: { teamA: number; teamB: number };
   createdAt: Date;
   finishedAt?: Date;
+  maxRounds: number;
+  deleted?: boolean;
+  deletedAt?: Date;
 }
 
 export interface GameSetup {
   teamA: Team;
   teamB: Team;
+  maxRounds: number;
 }
 
 export interface DatabaseGame {
@@ -41,12 +44,15 @@ export interface DatabaseGame {
   team_b_name: string;
   team_a_players: string[];
   team_b_players: string[];
-  status: 'active' | 'completed';
+  status: "active" | "completed";
   winner?: string;
   final_score_team_a?: number;
   final_score_team_b?: number;
   created_at: string;
   finished_at?: string;
+  deleted: boolean;
+  deleted_at?: string;
+  max_rounds: number;
 }
 
 export interface DatabaseRound {

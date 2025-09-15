@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, X, Spade } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";t { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trophy, X, Spades } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface GameCompleteModalProps {
@@ -18,7 +22,7 @@ export const GameCompleteModal = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowConfetti(false);
-    }, 5000);
+    }, 5000); // Let the confetti run for 5 seconds
 
     return () => clearTimeout(timer);
   }, []);
@@ -29,28 +33,8 @@ export const GameCompleteModal = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-[#1a1b1e]/90 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
       >
-        {/* Card Pattern Background */}
-        <div className="absolute inset-0 overflow-hidden opacity-10">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute"
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                transform: `rotate(${Math.random() * 360}deg)`,
-              }}
-            >
-              <Spade className="w-16 h-16 text-white" />
-            </motion.div>
-          ))}
-        </div>
-
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -59,22 +43,13 @@ export const GameCompleteModal = ({
             stiffness: 300,
             damping: 20,
           }}
-          className="relative"
         >
-          <Card className="relative overflow-hidden max-w-lg w-full mx-4 bg-gradient-to-br from-[#2C3E50] via-[#2C3E50] to-[#1a1b1e] border-2 border-[#34495E] shadow-2xl">
-            {/* Playing Card Design Elements */}
-            <div className="absolute top-4 left-4 text-white/20">
-              <Spade className="w-6 h-6" />
-            </div>
-            <div className="absolute bottom-4 right-4 text-white/20 rotate-180">
-              <Spade className="w-6 h-6" />
-            </div>
-
+          <Card className="relative overflow-hidden max-w-lg w-full mx-4 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 border-4 border-yellow-300 shadow-2xl">
             <Button
               onClick={onClose}
               variant="ghost"
               size="sm"
-              className="absolute top-3 right-3 text-white/60 hover:text-white hover:bg-white/10 z-10 rounded-full"
+              className="absolute top-3 right-3 text-white hover:bg-white/20 z-10 shadow-lg rounded-full"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -92,20 +67,33 @@ export const GameCompleteModal = ({
               >
                 <div className="relative mx-auto w-32 h-32 mb-4">
                   <motion.div
-                    className="relative"
                     animate={{
-                      scale: [1, 1.1, 1],
-                      rotateY: [0, 360],
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0],
                     }}
                     transition={{
-                      duration: 3,
+                      duration: 2,
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#FFD700] to-[#FFA500] rounded-full opacity-20 blur-xl" />
-                    <Trophy className="h-32 w-32 text-[#FFD700] mx-auto drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]" />
+                    <Trophy className="h-32 w-32 text-yellow-200 mx-auto drop-shadow-2xl" />
                   </motion.div>
+                  <motion.div
+                    className="absolute -top-4 -right-4"
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <Sparkles className="h-8 w-8 text-yellow-200" />
+                  </motion.div>
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-4 bg-black/20 rounded-full blur-md" />
                 </div>
 
                 <motion.div
@@ -115,12 +103,12 @@ export const GameCompleteModal = ({
                   transition={{ delay: 0.3 }}
                 >
                   <motion.h2
-                    className="text-6xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]"
+                    className="text-6xl font-bold text-white drop-shadow-lg"
                     animate={{
-                      scale: [1, 1.05, 1],
+                      scale: [1, 1.1, 1],
                     }}
                     transition={{
-                      duration: 2,
+                      duration: 1.5,
                       repeat: Infinity,
                       ease: "easeInOut",
                     }}
@@ -128,45 +116,44 @@ export const GameCompleteModal = ({
                     CHAMPIONS!
                   </motion.h2>
                   <motion.div
-                    className="text-4xl font-bold text-[#2C3E50] bg-gradient-to-r from-[#E9D5B0] to-[#F5E6CC] rounded-lg px-8 py-3 mx-auto inline-block shadow-lg relative overflow-hidden"
+                    className="text-4xl font-bold text-yellow-800 bg-white/90 rounded-lg px-8 py-3 mx-auto inline-block shadow-lg"
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.5, type: "spring" }}
                   >
-                    <div className="absolute inset-0 opacity-20 bg-[#2C3E50]/10" />
                     {winner}
                   </motion.div>
                   <motion.div
-                    className="flex justify-center gap-3"
+                    className="flex justify-center gap-2"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.8 }}
                   >
-                    {[...Array(4)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => (
                       <motion.div
                         key={i}
                         animate={{
+                          scale: [1, 1.5, 1],
                           rotate: [0, 360],
-                          scale: [1, 1.2, 1],
                         }}
                         transition={{
-                          duration: 3,
+                          duration: 2,
                           repeat: Infinity,
                           delay: i * 0.2,
                           ease: "easeInOut",
                         }}
                       >
-                        <Spade className="h-8 w-8 text-[#E9D5B0]" />
+                        <Star className="h-6 w-6 text-yellow-200 fill-yellow-200" />
                       </motion.div>
                     ))}
                   </motion.div>
                   <motion.p
-                    className="text-2xl text-[#E9D5B0] font-medium drop-shadow"
+                    className="text-2xl text-yellow-100 font-semibold drop-shadow-md"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1 }}
                   >
-                    A Royal Victory!
+                    Congratulations on your victory!
                   </motion.p>
                 </motion.div>
               </motion.div>
@@ -178,42 +165,55 @@ export const GameCompleteModal = ({
               >
                 <Button
                   onClick={onClose}
-                  className="bg-gradient-to-r from-[#E9D5B0] to-[#F5E6CC] hover:from-[#F5E6CC] hover:to-[#E9D5B0] text-[#2C3E50] font-bold px-10 py-3 text-lg shadow-[0_0_15px_rgba(233,213,176,0.3)] transform hover:scale-105 transition-all duration-300 rounded-full"
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-10 py-3 text-lg shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-yellow-300 rounded-full"
                 >
-                  Next Hand
+                  Continue the Journey!
                 </Button>
               </motion.div>
             </CardContent>
 
-            {/* Floating Cards Animation */}
+            {/* Enhanced Confetti Animation */}
             {showConfetti && (
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                {Array.from({ length: 20 }).map((_, i) => (
+                {Array.from({ length: 100 }).map((_, i) => (
                   <motion.div
                     key={i}
                     className="absolute"
                     initial={{
-                      top: "-20%",
+                      top: "-10%",
                       left: `${Math.random() * 100}%`,
                       scale: 0,
-                      rotate: 0,
                     }}
                     animate={{
-                      top: "120%",
-                      scale: [0.3, 1, 0.3],
-                      rotate: 360 * (Math.random() > 0.5 ? 1 : -1),
+                      top: "100%",
+                      scale: 1,
+                      rotate:
+                        Math.random() * 360 * (Math.random() > 0.5 ? 1 : -1),
                     }}
                     transition={{
-                      duration: 4 + Math.random() * 2,
+                      duration: 2 + Math.random() * 3,
                       repeat: Infinity,
                       delay: Math.random() * 2,
-                      ease: "easeInOut",
+                      ease: "linear",
                     }}
-                  >
-                    <div className="w-12 h-16 bg-gradient-to-br from-[#E9D5B0] to-[#F5E6CC] rounded-lg border border-white/20 shadow-lg flex items-center justify-center">
-                      <Spade className="w-6 h-6 text-[#2C3E50]" />
-                    </div>
-                  </motion.div>
+                    style={{
+                      width: `${Math.random() * 10 + 5}px`,
+                      height: `${Math.random() * 10 + 5}px`,
+                      background: [
+                        "#FFD700", // Gold
+                        "#FFA500", // Orange
+                        "#FF69B4", // Hot Pink
+                        "#00CED1", // Turquoise
+                        "#9370DB", // Purple
+                        "#FF6B6B", // Coral
+                        "#4ECDC4", // Mint
+                        "#F9CA24", // Yellow
+                        "#A3CB38", // Green
+                        "#1289A7", // Blue
+                      ][i % 10],
+                      borderRadius: Math.random() > 0.5 ? "50%" : "0",
+                    }}
+                  />
                 ))}
               </div>
             )}
