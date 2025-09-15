@@ -7,6 +7,9 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  #lovable-badge {
+    display: none !important;
+  }
   :root {
     /* Modern green-mint palette inspired by the reference images */
     --background: 150 30% 96%;
