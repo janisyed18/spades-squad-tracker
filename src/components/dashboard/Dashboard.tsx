@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { GameHistory } from "./GameHistory";
-import { FlexibleNewGameForm } from "./FlexibleNewGameForm";
-import { ModernSeatingArrangement } from "./ModernSeatingArrangement";
+import { NewGameForm } from "./NewGameForm";
+import { SeatingArrangement } from "./SeatingArrangement";
 import { Scorecard } from "../game/Scorecard";
 import { Game, GameSetup } from "@/types/game";
 import { useGames } from "@/hooks/useGames";
 import { useUser } from "@/hooks/useUser";
 import { GameFilters } from "./GameFilters";
 import { Header } from "@/components/ui/header";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 
 interface DashboardProps {
   user: string;
@@ -199,9 +197,10 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
   if (currentView === "newGame") {
     return (
       <div className="container mx-auto p-4">
-        <FlexibleNewGameForm
+        <NewGameForm
           onStartGame={handleShowSeating}
           onCancel={handleBackToDashboard}
+          initialSetup={gameSetup || undefined}
         />
       </div>
     );
@@ -257,14 +256,15 @@ export const Dashboard = ({ user, onLogout }: DashboardProps) => {
       )}
 
       {currentView === "newGame" && (
-        <FlexibleNewGameForm
+        <NewGameForm
           onStartGame={handleShowSeating}
           onCancel={handleBackToDashboard}
+          initialSetup={gameSetup || undefined}
         />
       )}
 
       {currentView === "seatingArrangement" && gameSetup && (
-        <ModernSeatingArrangement
+        <SeatingArrangement
           setup={gameSetup}
           onStartGame={handleStartGame}
           onCancel={() => setCurrentView("newGame")}

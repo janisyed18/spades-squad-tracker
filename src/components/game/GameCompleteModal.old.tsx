@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, X, Spade, Sparkles, Star } from "lucide-react";
+import { Trophy, X, Spade } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";t { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trophy, X, Spades } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface GameCompleteModalProps {
