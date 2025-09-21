@@ -62,14 +62,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom theme colors
-        glass: {
-          DEFAULT: "hsl(var(--glass-bg))",
-          border: "hsl(var(--glass-border))",
-        },
-        success: "hsl(var(--success))",
-        warning: "hsl(var(--warning))",
-        info: "hsl(var(--info))",
       },
       borderRadius: {
         lg: "var(--radius)",
